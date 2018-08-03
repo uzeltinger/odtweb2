@@ -707,7 +707,15 @@ OdtFullView = Backbone.View.extend({
   },
 
   rechazar96mas: function() {
-    if(confirm("Está seguro que quiere Rechazar la ODT Nro " + this.model.get("codigoODT") + "?")) {        
+    if(confirm("Está seguro que quiere Rechazar la ODT Nro " + this.model.get("codigoODT") + "?")) { 
+
+    ////     mailto_link = 'mailto:' + this.model.get('MNcontacto') + '?subject=' + 'ODT | Rechazo ODT Nro: ' + this.model.get("codigoODT") + '&body=' + 'Defina aquí el motivo del rechazo';
+    ////     win = window.open(mailto_link, 'emailWindow');
+    ////     win.close();                
+    ////  window.location.href = 'http://hwnt04/odtweb/include/rechazo.asp?codigo='  + this.model.get('codigoODT') + '&destinatario=' + this.model.get('MNcontacto')
+        var cadena= ",\"ventana1\",width=120,height=300,scrollbars=NO\"";           
+        window.open('http://hwnt04/odtweb/include/rechazo.asp?codigo='  + this.model.get('codigoODT') + '&destinatario=' + this.model.get('MNcontacto') + cadena); 
+
         console.log('rechazar96mas');
         $("#ventana-dialogo").hide();
         //location.reload();
