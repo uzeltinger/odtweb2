@@ -1,0 +1,1 @@
+<!--#INCLUDE file= "../../include/config.asp"--><%    QueryToJSON(conexion, "SELECT * FROM odtcontroldeobra WHERE codigoODT=" & request.QueryString("odt")).Flush   %>

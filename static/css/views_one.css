@@ -1,0 +1,149 @@
+@charset "UTF-8";
+body.admin.projects#admin_projects_index .pagination
+{clear:both}
+body.admin.projects#admin_projects_index .leftcol
+{display:inline;float:left;margin-left:10px;margin-right:10px;width:220px;-moz-border-radius:5px;-webkit-border-radius:5px;-o-border-radius:5px;-ms-border-radius:5px;-khtml-border-radius:5px;border-radius:5px;background:#eee;padding:10px;width:200px}
+body.admin.projects#admin_projects_index .leftcol ul li
+{margin-left:0}
+body.admin.projects#admin_projects_index .rightcol
+{display:inline;float:left;margin-left:10px;margin-right:10px;width:700px}
+body.admin.projects#admin_projects_index .rightcol ul
+{margin:0}
+body.admin.projects#admin_projects_index .rightcol .project-card-list
+{width:720px}
+body.admin.projects#admin_projects_index .check
+{display:inline;color:green}
+body.admin.projects#admin_projects_index .slash
+{display:inline;color:red}
+body.admin.projects#admin_projects_index .square
+{width:20px;height:20px}
+body.admin.projects#admin_projects_index .circle
+{width:20px;height:20px;-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px;color:#fff}
+body.admin.projects#admin_projects_index .sortable_table
+{font-size:11px}
+body.admin.projects#admin_projects_index .sortable_table th,body.admin.projects#admin_projects_index .sortable_table head,body.admin.projects#admin_projects_index .sortable_table tr
+{background:#fff;border-right:1px solid #ddd;border-bottom:1px solid #aaa}
+body.admin.projects#admin_projects_index .sortable_table th
+{color:grey;font-size:10px}
+body.admin.projects#admin_projects_index .sortable_table th.headerSortUp
+{background:url(/cache-bebbeb2c2/images/tablesorter_asc.gif) no-repeat;background-repeat:no-repeat;background-position:right center}
+body.admin.projects#admin_projects_index .sortable_table th.headerSortDown
+{background:url(/cache-bebbeb2c2/images/tablesorter_desc.gif) no-repeat;background-repeat:no-repeat;background-position:right center}
+body.admin.projects#admin_projects_index .sortable_table table
+{border:0;padding:0}
+body.admin.projects#admin_projects_index .sortable_table td,body.admin.projects#admin_projects_index .sortable_table th
+{padding:3px}
+body.admin.projects#admin_projects_index .sortable_table td
+{vertical-align:middle}
+body.admin.projects#admin_projects_index .sortable_table tr
+{line-height:15px}
+body.admin.projects#admin_projects_index .sortable_table tr:nth-of-type(even)
+{background-color:#e6f2ff;border-bottom:1px solid #c5dbf7;border-top:1px solid #c5dbf7}
+body.admin.projects#admin_projects_index .sortable_table .project_name
+{max-width:100px;text-overflow:ellipsis}
+body.admin.projects#admin_projects_index .sortable_table .creator_name
+{width:60px;text-overflow:ellipsis}
+body.admin.projects#admin_projects_index .sortable_table .category_name
+{max-width:70px;text-overflow:ellipsis}
+body.admin.projects#admin_projects_index .sortable_table .sort_by_column
+{width:50px}
+body.admin.projects#admin_projects_index .sortable_table .one_char
+{width:20px;text-transform:capitalize;font-size:13px;font-family:Andale Mono,monospace;font-weight:bold;text-align:center;padding-top:2px}
+body.admin.projects#admin_projects_index .sortable_table .project_notes,body.admin.projects#admin_projects_index .sortable_table .has_video
+{width:10px;text-align:center}
+body.admin.projects#admin_projects_index .sortable_table .backers_count
+{width:40px}
+body.admin.projects#admin_projects_index .sortable_table .percent_raised
+{width:45px}
+body.admin.projects#admin_projects_index .sortable_table .goal
+{width:40px}
+body.admin.projects#admin_projects_index .sortable_table .overflow_column
+{overflow:hidden;white-space:nowrap}
+body.admin.projects#admin_projects_index .highlighted
+{color:rgba(200,0,0,0.3)}
+body.admin.projects#admin_projects_index .results_info
+{display:inline;float:left;margin-left:10px;margin-right:10px;width:940px;padding-bottom:25px}
+body.admin.projects#admin_projects_index .results_info .warning
+{background:#f6f2ae;margin-top:10px;display:inline-block;padding:5px}
+body.admin.projects#admin_projects_index .results_info .count
+{font-size:20px}
+body.admin.projects#admin_projects_index .mobius .page
+{overflow:hidden;*zoom:1}
+body.admin.projects#admin_projects_index .project-card-list .stats
+{padding:5px;line-height:20px}
+body.admin.projects#admin_projects_index .project-card-list li.project
+{position:relative;width:220px;float:left;margin-right:20px;margin-left:0;list-style:none}
+body.admin.projects#admin_projects_index .project-card-list li.project li
+{list-style-image:none;list-style-type:none;margin-left:0}
+body.admin.projects#admin_projects_index .project-card-list .invalid_project
+{height:340px;color:rgba(0,0,0,0.2);text-transform:uppercase;text-align:center;position:relative;vertical-align:middle;padding:20px}
+body.admin.projects#admin_projects_index .project-card-list .state_colors
+{position:absolute;bottom:66px;right:-27px;width:100%;margin-right:0;margin-left:auto;text-align:right}
+body.admin.projects#admin_projects_index .project-card-list h3
+{margin:0}
+body.admin.projects#admin_projects_index .project-card-list .color_project_state,body.admin.projects#admin_projects_index .project-card-list .color_project_moderated_state,body.admin.projects#admin_projects_index .project-card-list .has_video
+{text-align:center;width:20px;height:20px;display:inline-block;position:relative;left:-30px}
+body.admin.projects#admin_projects_index .project-card-list .has_video
+{border-style:solid;border-width:1px;height:19px;width:19px}
+body.admin.projects#admin_projects_index .project-card-list .overlay
+{position:absolute;bottom:25px;left:5px;width:210px;height:100px;size:10px;line-height:15px}
+body.admin.projects#admin_projects_index .project-card-list .overlay li
+{list-style:none;padding:2px;margin:10px;position:absolute}
+body.admin.projects#admin_projects_index #projects_search .toggle
+{margin-top:10px}
+body.admin.projects#admin_projects_index #projects_search .button-action
+{text-align:center;display:inline-block}
+body.admin.projects#admin_projects_index #projects_search .button-action.all,body.admin.projects#admin_projects_index #projects_search .button-action.none
+{line-height:16px;height:16px}
+body.admin.projects#admin_projects_index #projects_search .reset
+{margin:10px;text-align:center}
+body.admin.projects#admin_projects_index #projects_search .button-action.submit
+{height:32px;width:200px}
+body.admin.projects#admin_projects_index #projects_search input[type=text]#percent_raised
+{border:0}
+body.admin.projects#admin_projects_index #projects_search select#category
+{margin-top:10px;width:200px}
+body.admin.projects#admin_projects_index #projects_search select#sort_by,body.admin.projects#admin_projects_index #projects_search select#since
+{width:145px}
+body.admin.projects#admin_projects_index #projects_search ul
+{margin:0}
+body.admin.projects#admin_projects_index #projects_search li
+{list-style:none}
+body.admin.projects#admin_projects_index #projects_search li label
+{padding:4px;margin:5px 0;cursor:pointer;width:160px;user-select:none;-moz-user-select:-moz-none;-khtml-user-select:none;-webkit-user-select:none}
+body.admin.projects#admin_projects_index #projects_search input[type=checkbox]
+{margin-right:0}
+body.admin.projects#admin_projects_index #projects_search input[type=text]
+{width:188px}
+body.admin.projects#admin_projects_index #projects_search label
+{display:-moz-inline-box;display:-moz-inline-stack;-moz-box-orient:vertical;display:inline-block;vertical-align:middle;zoom:1;*display:inline;margin-bottom:0;text-transform:none}
+body.admin.projects#admin_projects_index #projects_search .asc_or_desc
+{text-align:center}
+body.admin.projects#admin_projects_index #projects_search .slider-layout
+{padding:10px}
+body.admin.projects#admin_projects_index #projects_search p.text_field
+{position:relative}
+body.admin.projects#admin_projects_index #projects_search label.overlabel
+{display:block;position:absolute;top:.2em;left:.5em;z-index:1;cursor:text}
+.NS-admin_submissions__edit#messages_wrap
+{display:inline;float:left;margin-left:10px;margin-right:10px;width:940px}
+#admin_submissions_index input[type=checkbox]
+{margin-right:0}
+#admin_submissions_index input[type=submit]
+{display:inline-block;float:right}
+body#admin_users_show ul.more_details>li
+{padding:5px 0 5px 5px;border-bottom:1px solid #ccc;float:left;clear:left}
+body#admin_users_show ul.more_details>li:hover
+{background-color:#fff}
+body#admin_users_show ul.more_details>li.no_underline
+{border-bottom:0!important}
+body.admin ol.proposals>li
+{margin-bottom:2em}
+body.submission_stats .sortable_table tr:nth-of-type(even)
+{background-color:#e6f2ff;border-bottom:1px solid #c5dbf7;border-top:1px solid #c5dbf7}
+figure
+{margin:0}
+article,header,section,footer
+{display:block}
+body#curated_pages_show form .value:hover.image
+{background:#fff}

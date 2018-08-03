@@ -1,0 +1,191 @@
+/* ESTILOS LISTA MATERIALES */
+/*
+  QUE PRETENDE HACER TODO ESTO? facil... 
+    si a una li le pongo .materialesView, entonces muestra los div.labels
+    y si le pongo .materialesEdit, muestra los div editFields.
+*/
+
+li.encabezadosMateriales span {
+display: inline-block;
+height: 30px;
+background-color: darkgrey;
+margin: 0;
+padding: 0;
+line-height: 30px;
+color: white;
+font-weight: bold;
+}
+
+
+
+div.labels > label {
+margin: 6px 10px 0 0;
+padding: 2px;
+height: 20px;
+
+}
+
+.fieldMat {
+border-bottom: 1px dashed black;
+margin: 6px 10px 0 0;
+padding: 2px;
+border-top: none;
+border-left: none;
+border-right: none;
+}
+
+li.materialesView {
+  border-bottom: 1px solid #DADADA;
+  height: 26px;
+}
+
+li.materialesEdit {
+  border-bottom: 1px solid #DADADA;
+  height: 26px;
+}
+
+
+li.materialesView div.labels {
+  /*border: 1px solid orange;*/
+  display: block;
+}
+
+li.materialesEdit div.labels {
+  /*border: 1px solid orange;*/
+  display: none;
+}
+
+
+li.materialesView div.editFields {
+  /*border: 1px solid orange;*/
+  display: none;
+}
+
+li.materialesEdit div.editFields {
+  /*border: 1px solid orange;*/
+  display: block;
+}
+
+
+ul#listaMateriales {
+    width: 763px;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+
+
+
+
+
+
+/* ESTILOS LISTA SERVICIOS */
+li.encabezadosServicios span {
+  display: inline-block;
+  height: 30px;
+  background-color: darkgrey;
+  margin: 0;
+  padding: 0;
+  line-height: 30px;
+  color: white;
+  font-weight: bold;
+}
+
+
+
+li.serviciosView {
+  border-bottom: 1px solid #DADADA;
+  height: 26px;
+
+}
+
+li.serviciosEdit {
+  border-bottom: 1px solid #DADADA;
+  height: 26px;
+}
+
+li.serviciosView div.labels {
+  display: block;
+}
+
+li.serviciosEdit div.labels {
+  display: none;
+}
+
+
+
+li.serviciosView div.editFields {
+  display: none;
+}
+
+li.serviciosEdit div.editFields {
+  display: block;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tr.serviciosView {
+  border-bottom: 1px solid gray;
+}
+
+tr.serviciosView td {
+  /*border: 1px solid orange;*/
+  height: 30px;
+}
+tr.serviciosEdit td {
+  /*border: 1px solid orange;*/
+  height: 30px;
+}
+
+
+
+tr.serviciosView td label{
+  display: block;
+  float:none;
+  width: auto;
+}
+
+
+tr.serviciosView td input,tr.serviciosView td select {
+  
+  display: none;
+  border: 1px solid gray;
+  padding: 2px;
+}
+
+
+tr.serviciosEdit td label {
+
+  display: none;
+  float:none;
+  width: auto;
+}
+
+tr.serviciosEdit td input,tr.serviciosEdit td select {
+  display: inline;
+  border: 1px solid gray;
+  padding: 2px;
+}

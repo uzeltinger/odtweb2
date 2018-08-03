@@ -1,0 +1,159 @@
+.clear {
+  clear: both;
+}
+
+div.edicionFactura {
+    margin-left: 20px;
+}
+
+div.edicionFacturaDatos {
+    width: 630px;
+    margin-bottom: 10px;
+}
+
+
+div.fRow div {
+  float:left; 
+  margin-right: 10px;
+  overflow: hidden;
+  height: 25px;
+}
+
+
+li.facturaRow {
+padding-left: 5px;
+margin-left: 0;
+border-bottom: 1px #E6E6E6 solid;
+float: left;
+}
+
+li.facturaRow:hover {
+  background-color: #F2F0E9;
+  cursor: pointer;
+}
+
+
+.facturasListContainer {
+  float: left;
+  margin-right: 30px;
+  margin-top: 10px;
+}
+
+.facturasList {
+  width: 370px;
+  height: 400px;
+  overflow: auto;
+  border: 1px solid lightBlue;
+}
+
+
+.facturasList li {
+  font-size: 11px;
+  display: block;
+  margin: 3px;
+  padding: 3px 0px 3px 0px
+  color: black;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 22px;  
+  /*height: 23px; */
+  overflow: hidden;
+  width: 346px;
+}
+
+.facturasList li:hover {  background: #d0d0d0;  }
+
+.facturasList li span {
+  border-left: 1px solid white;
+}
+
+.facturasList li span:first-child {
+  border-left: 0;
+}
+
+
+
+.fCodigoODT {
+  display: inline-block;
+  width: 45px;
+  text-align: center;
+  height: 23px;
+}
+
+
+.fMN {
+  display: inline-block;
+  width: 65px;
+  text-align: center;
+  height: 23px;
+}
+
+
+.fNombre {
+  display: inline-block;
+  width: 145px;
+  text-align: left;
+  padding: 0 0 0 4px;
+  height: 23px;
+}
+
+
+
+.ftotalODT {
+  display: inline-block;
+  width: 55px;
+  text-align: right;
+  padding: 0 4px 0 0;
+}
+
+
+
+
+.fButton {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  height: 23px;
+}
+
+
+.iconRight {
+  background-image: url('ui-lightness/images/iconRight.gif');
+  background-repeat: no-repeat;
+  background-position: center 45%;
+}
+
+
+.iconLeft {
+  background-image: url('ui-lightness/images/iconLeft.gif');
+  background-repeat: no-repeat;
+  background-position: center 45%;
+}
+
+
+
+.totalFactura {
+  display: block;
+  font-size: 18px;
+  margin: 12px 0 5px 0;
+}
+
+
+
+
+
+.ui-selecting { background: #FECA40; }
+.ui-selected { background: #5BB75B; color: white; }
+
+
+
+.editarFactura a {
+  
+}
+
+
+.editarFactura a:hover {
+  color: gray;
+}
+

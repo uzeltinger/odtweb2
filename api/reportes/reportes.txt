@@ -1,0 +1,1323 @@
+Sub ODT_ExportarFacturadas(desde As Date, hasta As Date)
+Dim i
+Dim inx As Long
+Dim sql As String
+Dim fecha As String
+Dim f As Date
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim cc As String
+Dim fn As String
+
+    sql = "SELECT ODTs.FacturaNro, ODTs.codigoCuenta from ODTs " & _
+        " where DATE(ODTs.FechaHoraSolicitud) >= '" & Format(desde, fechaSQL) & "' AND DATE(ODTs.FechaHoraSolicitud) <= '" & Format(hasta, fechaSQL) & "' AND ODTs.activo " & _
+        " GROUP BY ODTs.FacturaNro, ODTs.codigoCuenta " & _
+        " HAVING (((ODTs.FacturaNro)<>'') " & _
+        " ORDER BY ODTs.FacturaNro, ODTs.codigoCuenta;"
+
+    Set rst = DbQuery(sql)
+        
+    cc = ""
+    fn = ""
+    If Not rst.EOF Then
+        iniciaEXCEL
+        ExcelWrapText = True
+        
+        While Not rst.EOF
+            If fn <> evitarNULL(rst("FacturaNro")) Then
+                fn = rst("FacturaNro")
+                agregarHojaEXCEL "Factura Nro " & rst("FacturaNro")
+                agregarAEXCEL "Factura Nro " & rst("FacturaNro")
+                agregarAEXCEL "Cuenta", "Cost Center", "Total"
+            End If
+            subtotal = totalCuenta(evitarNULL(rst("Cuenta")), evitarNULL(rst("facturaNro")), desde, hasta)
+            agregarAEXCEL evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta"))), Round(subtotal, 2)
+            
+            rst.MoveNext
+        Wend
+        finalizaEXCEL
+    End If
+End Sub
+
+Sub ODT_reporte_listadoGlobalOdt(desde As Date, hasta As Date)
+Dim i
+Dim inx As Long
+Dim sql As String
+Dim fecha As String
+Dim f As Date
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim cc As String
+Dim fn As String
+Dim init As Boolean
+Dim p As Single
+Dim c As Single
+
+    init = False
+    
+    sql = "SELECT ODTs.codigoODT, ODTs.FechaHoraSolicitud, ODTedificios.Edificio, ODTedificios.Planta, ODTitemsRealizados.Cant, ODTItems.Descripcion, ODTs.MNSolicitante, ODTs.MNAprobador, ODTs.FechaRealizacion, ODTs.CompletadaEmpresa, ODTs.Aprobado, ODTs.FacturaNro, ODTs.MNdefinidor, ODTs.fechaDefinicion, ODTItems.Precio, ODTs.codigocuenta, ODTs.completadaEmpresa, ODTs.activo, ODTs.FacturaNro  " & _
+    "FROM ((ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) LEFT JOIN ODTitemsRealizados ON ODTs.codigoODT = ODTitemsRealizados.CodigoODT) LEFT JOIN ODTItems ON ODTitemsRealizados.codigoItem = ODTItems.codigoItem " & _
+    "where DATE(odts.FechaHoraSolicitud) >= '" & Format(desde, fechaSQL) & "' AND DATE(odts.FechaHoraSolicitud) <= '" & Format(hasta, fechaSQL) & "' " & _
+    ""
+
+    sql = sql & " UNION "
+        
+' materiales
+    sql = sql & "SELECT ODTs.codigoODT, ODTs.FechaHoraSolicitud, ODTedificios.Edificio, ODTedificios.Planta, '1' as cant, ODTItemsMateriales.MaterialesTxt as descripcion, ODTs.MNSolicitante, ODTs.MNAprobador, ODTs.FechaRealizacion, ODTs.CompletadaEmpresa, ODTs.Aprobado, ODTs.FacturaNro, ODTs.MNdefinidor, ODTs.fechaDefinicion, ODTItemsMateriales.Precio, ODTs.codigocuenta, ODTs.completadaEmpresa, ODTs.activo, ODTs.FacturaNro " & _
+    "FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) INNER JOIN ODTItemsMateriales ON ODTs.codigoODT = ODTItemsMateriales.CodigoODT " & _
+    "where DATE(odts.FechaHoraSolicitud) >= '" & Format(desde, fechaSQL) & "' AND DATE(odts.FechaHoraSolicitud) <= '" & Format(hasta, fechaSQL) & "' " & _
+    "ORDER BY codigoODT DESC"
+    
+    Debug.Print sql
+
+    Set rst = DbQuery(sql)
+        
+    cc = ""
+    fn = ""
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+                        
+        agregarHojaEXCEL "Listado Global ODT"
+        
+        agregarTituloAExcel "ODT | Listado Global"
+        agregarAEXCEL "Entre " & Format(desde, "dd/MMM/yy") & " y " & Format(hasta, "dd/MMM/yy")
+        mezclarCeldas 1, 4
+        agregarAEXCEL ""
+        
+        agregarAEXCELbold "Nro ODT", "Fecha Solicitud", "MN Solicitante", "Solicitante", "MN Definidor", "Definidor", "MN Aprobador", "Aprobador", "Edifico", "Planta", "Cantidad", "Descripción", "Valor", "Cuenta SAP", "Cost Center", "Completada", "Activa", "FacturaNro"
+
+        agregarSeparadorTablaGrueso
+        
+        While Not rst.EOF
+        
+            If evitarNULL(rst("cant")) <> "" And evitarNULL(rst("precio")) <> "" Then
+                p = rst("cant") * rst("precio")
+            Else
+                p = 0
+            End If
+            
+            If evitarNULL(rst("cant")) = "" Then
+                c = 0
+            Else
+                c = rst("cant")
+            End If
+            
+            agregarAEXCEL rst("codigoODT"), Format(rst("fechaHoraSolicitud"), "dd.MMM.yy"), rst("MNSolicitante"), obtenerNombre(rst("MNSolicitante")), evitarNULL(rst("MNDefinidor")), obtenerNombre(evitarNULL(rst("MNDefinidor"))), evitarNULL(rst("MNAprobador")), obtenerNombre(evitarNULL(rst("MNAprobador"))), rst("Edificio"), rst("planta"), Format(c, "0.00"), evitarNULL(rst("descripcion")), FormatCurrency(p, 2), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta"))), rst("completadaEmpresa"), rst("activo"), evitarNULL(rst("FacturaNro"))
+            
+            rst.MoveNext
+            
+        Wend
+        
+    End If
+
+    If init Then finalizaEXCEL
+    
+End Sub
+
+
+Sub ODT_reporte_totalSinFacturar(desde As Date, hasta As Date)
+Dim i
+Dim inx As Long
+Dim sql As String
+Dim fecha As String
+Dim f As Date
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim cc As String
+Dim fn As String
+Dim init As Boolean
+
+    init = False
+  
+    sql = "SELECT ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta WHERE odts.facturaNro Is Null AND DATE(odts.FechaHoraSolicitud) >= '" & Format(desde, fechaSQL) & "' AND DATE(odts.FechaHoraSolicitud) <= '" & Format(hasta, fechaSQL) & "' AND odts.activo AND odts.CompletadaEmpresa AND SistemaCuentas.codigoEmpresa = 7 ORDER BY ODTs.codigoODT DESC;"
+  
+    Set rst = DbQuery(sql)
+        
+    cc = ""
+    fn = ""
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "DOW"
+        
+        agregarTituloAExcel "Ordenes Definidas sin Facturar"
+        
+        agregarAEXCEL ""
+        
+        agregarAEXCEL "Nro Orden", "Descripción", "Valor", "Edifico", "Planta", "Cuenta", "Cost Center"
+        marcarCamposEXCEL
+        
+        While Not rst.EOF
+            
+            Total = totalODT(rst("codigoODT"))
+            fn = Replace(rst("descripcionODT"), Chr(10), "")
+            fn = Replace(fn, Chr(13), "")
+            agregarAEXCEL rst("codigoODT"), fn, FormatCurrency(Total, 3), rst("Edificio"), rst("planta"), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta")))
+            
+            rst.MoveNext
+            
+        Wend
+        
+    End If
+    
+    sql = "SELECT ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where (((odts.facturaNro) Is Null) And ((odts.FechaHoraSolicitud) >= '" & Format(desde, fechaSQL) & "' And (odts.FechaHoraSolicitud) <= '" & Format(hasta, fechaSQL) & "') And ((odts.activo)) And ((odts.CompletadaEmpresa)) And ((SistemaCuentas.codigoEmpresa) = 1)) ORDER BY ODTs.codigoODT DESC;"
+    
+    Debug.Print sql
+
+    Set rst = DbQuery(sql)
+        
+    cc = ""
+    fn = ""
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        
+        agregarHojaEXCEL "PBBPolisur"
+        
+        agregarTituloAExcel "Ordenes Definidas sin Facturar"
+        
+        agregarAEXCEL ""
+        
+        agregarAEXCEL "Nro Orden", "Descripción", "Valor", "Edifico", "Planta", "Cuenta", "Cost Center"
+        marcarCamposEXCEL
+        
+        While Not rst.EOF
+            
+            Total = totalODT(rst("codigoODT"))
+            fn = Replace(rst("descripcionODT"), Chr(10), "")
+            fn = Replace(fn, Chr(13), "")
+            agregarAEXCEL rst("codigoODT"), fn, FormatCurrency(Total, 3), rst("Edificio"), rst("planta"), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta")))
+            
+            rst.MoveNext
+            
+        Wend
+        
+    End If
+    
+    If init Then finalizaEXCEL
+    
+End Sub
+
+Sub ODT_reporte_revisionTrabajosFactura(numeroFactura As String)
+
+Dim i
+Dim inx As Long
+Dim sql As String
+Dim fecha As String
+Dim f As Date
+Dim rst As ADODB.Recordset
+Dim rstM As ADODB.Recordset
+Dim Total As Single
+Dim tmo As Single
+Dim tma As Single
+Dim subtotal As Single
+Dim cc As String
+Dim fn As String
+Dim init As Boolean
+
+    init = False
+
+'Debug.Print sql
+
+    'selecciono las ODTs que tiene cuentas de dow argentina
+    sql = "SELECT ODTs.ComentariosSG, ODTs.FechaHoraSolicitud, ODTs.FechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) LEFT JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where ((ODTs.facturaNro= '" & numeroFactura & "') And ((odts.activo)) And ((odts.CompletadaEmpresa)) And ((SistemaCuentas.codigoEmpresa) = 7)) ORDER BY ODTs.codigoODT DESC;"
+
+    Set rst = DbQuery(sql)
+        
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL horizontal
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "DOW"
+        
+        agregarTituloAExcel "Planilla de Revisión de Trabajos en Factura " & numeroFactura
+        
+        agregarAEXCEL ""
+        
+        While Not rst.EOF
+        
+            tmo = totalODTmanoDeObra(rst("codigoODT"))
+            tma = totalODTmateriales(rst("codigoODT"))
+            
+            If tma + tmo > 0 Then
+        
+                agregarAEXCELbold "ODT " & rst("codigoODT")
+                mezclarCeldas 1, 2
+                marcarLineaDeCeldas 1, 7, RGB(220, 220, 220)
+                agregarAEXCELbold "", "Edificio", "Cost Center", "Cuenta", "Materiales", "Mano de Obra", "Total"
+                mezclarCeldas 1, 2
+                alinearCeldas 5, 7, derecha
+                agregarSeparadorTablaMediano
+                
+                agregarAEXCEL rst("edificio") & " - " & rst("planta"), "", obtenerCostCenter(evitarNULL(rst("Cuenta"))), evitarNULL(rst("Cuenta")), FormatCurrency(tma, 3), FormatCurrency(tmo, 3), FormatCurrency(tmo + tma, 3)
+                mezclarCeldas 1, 2
+                'agregarAEXCEL rst("codigoODT"), fn, FormatCurrency(Total, 2), rst("Edificio"), rst("planta"), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta")))
+                
+                agregarAEXCELbold "Descripción de Tareas"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(rst("descripcionODT"), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                ' Imprimo detalle de la ODT
+    
+                sql = "SELECT ODTItems.Descripcion, ODTItems.Precio, ODTitemsRealizados.Cant, ODTitemsRealizados.Observaciones " & _
+                    "FROM ODTitemsRealizados INNER JOIN ODTItems ON ODTitemsRealizados.codigoItem = ODTItems.codigoItem " & _
+                    "WHERE (((ODTitemsRealizados.CodigoODT)=" & rst("codigoODT") & ")) ORDER BY ODTitemsRealizados.fechaCreacion;"
+            
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    agregarAEXCELbold "Mano de Obra"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    i = 1
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("Descripcion"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                            
+                        'subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        'Total = Total + (rstM("cant") * rstM("precio"))
+                        
+                        i = i + 1
+                        
+                        rstM.MoveNext
+                    Wend
+                    
+                    'inx = lvListaItems.AddItem("" & vbTab & "" & vbTab & "SubTotal Mano de Obra" & vbTab & Format(Round(subtotal, 2), "$ 0.00"))
+                
+                End If
+            
+                sql = "SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.MaterialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, Observaciones " & _
+                "from ODTItemsMateriales " & _
+                "where (((ODTItemsMateriales.codigoODT) = " & rst("codigoODT") & ")) ORDER BY ODTItemsMateriales.fechaCreacion;"
+                
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    i = 1
+                    subtotal = 0
+                    
+                    agregarAEXCELbold "Lista Materiales"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("materialestxt"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                        
+                        subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        
+                        rstM.MoveNext
+                        
+                        i = i + 1
+                    Wend
+                
+                    'agrego la gestion de materiales
+                    If evitarNULL(rst("fechaRealizacion")) = "" Then
+                        f = rst("fechaHoraSolicitud")
+                        f = Now
+                    Else
+                        f = rst("fechaRealizacion")
+                    End If
+                    
+                    CoeficienteGestionMateriales = ObtenerCGC(f)
+                    
+                    gestionMateriales = (subtotal * CoeficienteGestionMateriales)
+                    
+                    agregarAEXCEL CStr(i), "Gestión de Materiales " & CoeficienteGestionMateriales * 100 & "%", "1", FormatCurrency(gestionMateriales, 3), FormatCurrency(gestionMateriales, 3)
+                    
+                End If
+        
+                agregarAEXCELbold "Comentarios"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(evitarNULL(rst("comentariosSG")), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                agregarAEXCEL ""
+                
+            End If
+            
+            rst.MoveNext
+            
+        Wend
+        
+        anchoColumna 1, 5.5
+        anchoColumna 2, 50
+        anchoColumna 6, 20
+        
+    End If
+
+    'selecciono las ODTs que tiene cuentas de pbbpolisur
+    sql = "SELECT ODTs.ComentariosSG, ODTs.FechaHoraSolicitud, ODTs.FechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) LEFT JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where ((ODTs.facturaNro= '" & numeroFactura & "') And ((odts.activo)) And ((odts.CompletadaEmpresa)) And ((SistemaCuentas.codigoEmpresa) = 1)) ORDER BY ODTs.codigoODT DESC;"
+        
+    'Debug.Print sql
+
+    Set rst = DbQuery(sql)
+        
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL horizontal
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "PBBPolisur"
+        
+        agregarTituloAExcel "Planilla de Revisión de Trabajos en Factura " & numeroFactura
+        
+        agregarAEXCEL ""
+        
+        While Not rst.EOF
+        
+            tmo = totalODTmanoDeObra(rst("codigoODT"))
+            tma = totalODTmateriales(rst("codigoODT"))
+            
+            If tma + tmo > 0 Then
+        
+                agregarAEXCELbold "ODT " & rst("codigoODT")
+                mezclarCeldas 1, 2
+                marcarLineaDeCeldas 1, 7, RGB(220, 220, 220)
+                agregarAEXCELbold "", "Edificio", "Cost Center", "Cuenta", "Materiales", "Mano de Obra", "Total"
+                mezclarCeldas 1, 2
+                alinearCeldas 5, 7, derecha
+                agregarSeparadorTablaMediano
+                
+                agregarAEXCEL rst("edificio") & " - " & rst("planta"), "", obtenerCostCenter(evitarNULL(rst("Cuenta"))), evitarNULL(rst("Cuenta")), FormatCurrency(tma, 3), FormatCurrency(tmo, 3), FormatCurrency(tmo + tma, 3)
+                mezclarCeldas 1, 2
+                'agregarAEXCEL rst("codigoODT"), fn, FormatCurrency(Total, 2), rst("Edificio"), rst("planta"), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta")))
+                
+                agregarAEXCELbold "Descripción de Tareas"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(rst("descripcionODT"), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                ' Imprimo detalle de la ODT
+    
+                sql = "SELECT ODTItems.Descripcion, ODTItems.Precio, ODTitemsRealizados.Cant, ODTitemsRealizados.Observaciones " & _
+                    "FROM ODTitemsRealizados INNER JOIN ODTItems ON ODTitemsRealizados.codigoItem = ODTItems.codigoItem " & _
+                    "WHERE (((ODTitemsRealizados.CodigoODT)=" & rst("codigoODT") & ")) ORDER BY ODTitemsRealizados.fechaCreacion;"
+            
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    agregarAEXCELbold "Mano de Obra"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    i = 1
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("Descripcion"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                            
+                        'subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        'Total = Total + (rstM("cant") * rstM("precio"))
+                        
+                        i = i + 1
+                        
+                        rstM.MoveNext
+                    Wend
+                    
+                    'inx = lvListaItems.AddItem("" & vbTab & "" & vbTab & "SubTotal Mano de Obra" & vbTab & Format(Round(subtotal, 2), "$ 0.00"))
+                
+                End If
+            
+                sql = "SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.MaterialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, Observaciones " & _
+                "from ODTItemsMateriales " & _
+                "where (((ODTItemsMateriales.codigoODT) = " & rst("codigoODT") & ")) ORDER BY ODTItemsMateriales.fechaCreacion;"
+                
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    i = 1
+                    subtotal = 0
+                    
+                    agregarAEXCELbold "Lista Materiales"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("materialestxt"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                        
+                        subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        
+                        rstM.MoveNext
+                        
+                        i = i + 1
+                    Wend
+                
+                    'agrego la gestion de materiales
+                    If evitarNULL(rst("fechaRealizacion")) = "" Then
+                        f = rst("fechaHoraSolicitud")
+                        f = Now
+                    Else
+                        f = rst("fechaRealizacion")
+                    End If
+                    
+                    CoeficienteGestionMateriales = ObtenerCGC(f)
+                    
+                    gestionMateriales = (subtotal * CoeficienteGestionMateriales)
+                    
+                    agregarAEXCEL CStr(i), "Gestión de Materiales " & CoeficienteGestionMateriales * 100 & "%", "1", FormatCurrency(gestionMateriales, 3), FormatCurrency(gestionMateriales, 3)
+                    
+                End If
+        
+                agregarAEXCELbold "Comentarios"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(evitarNULL(rst("comentariosSG")), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                agregarAEXCEL ""
+                
+            End If
+            
+            rst.MoveNext
+            
+        Wend
+        
+        anchoColumna 1, 5.5
+        anchoColumna 2, 50
+        anchoColumna 6, 20
+        
+        
+    End If
+    
+    If init Then finalizaEXCEL
+
+
+End Sub
+
+Sub ODT_reporte_revisionDeTrabajos()
+Dim i
+Dim inx As Long
+Dim sql As String
+Dim fecha As String
+Dim f As Date
+Dim rst As ADODB.Recordset
+Dim rstM As ADODB.Recordset
+Dim Total As Single
+Dim tmo As Single
+Dim tma As Single
+Dim subtotal As Single
+Dim cc As String
+Dim fn As String
+Dim init As Boolean
+
+    init = False
+
+    sql = "SELECT comentariosSg, fechaHoraSolicitud, ODTs.fechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio " & _
+    " WHERE ODTs.facturaNro Is Null AND ODTs.activo And ODTs.completadaEmpresa ORDER BY codigoODT DESC;"
+    
+    'selecciono las ODTs que tiene cuentas de dow argentina
+    sql = "SELECT ODTs.ComentariosSG, ODTs.FechaHoraSolicitud, ODTs.FechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) LEFT JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where odts.facturaNro Is Null And odts.activo And odts.CompletadaEmpresa And SistemaCuentas.codigoEmpresa = 7 ORDER BY ODTs.codigoODT DESC;"
+
+    Set rst = DbQuery(sql)
+        
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL horizontal
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "DOW"
+        
+        agregarTituloAExcel "Planilla de Revisión de Trabajos"
+        
+        agregarAEXCEL ""
+        
+        While Not rst.EOF
+        
+            tmo = totalODTmanoDeObra(rst("codigoODT"))
+            tma = totalODTmateriales(rst("codigoODT"))
+            
+            If tma + tmo > 0 Then
+        
+                agregarAEXCELbold "ODT " & rst("codigoODT")
+                mezclarCeldas 1, 2
+                marcarLineaDeCeldas 1, 7, RGB(220, 220, 220)
+                agregarAEXCELbold "", "Edificio", "Cost Center", "Cuenta", "Materiales", "Mano de Obra", "Total"
+                mezclarCeldas 1, 2
+                alinearCeldas 5, 7, derecha
+                agregarSeparadorTablaMediano
+                
+                agregarAEXCEL rst("edificio") & " - " & rst("planta"), "", obtenerCostCenter(evitarNULL(rst("Cuenta"))), evitarNULL(rst("Cuenta")), FormatCurrency(tma, 3), FormatCurrency(tmo, 3), FormatCurrency(tmo + tma, 3)
+                mezclarCeldas 1, 2
+                'agregarAEXCEL rst("codigoODT"), fn, FormatCurrency(Total, 2), rst("Edificio"), rst("planta"), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta")))
+                
+                agregarAEXCELbold "Descripción de Tareas"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(rst("descripcionODT"), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                ' Imprimo detalle de la ODT
+    
+                sql = "SELECT ODTItems.Descripcion, ODTItems.Precio, ODTitemsRealizados.Cant, ODTitemsRealizados.Observaciones " & _
+                    "FROM ODTitemsRealizados INNER JOIN ODTItems ON ODTitemsRealizados.codigoItem = ODTItems.codigoItem " & _
+                    "WHERE (((ODTitemsRealizados.CodigoODT)=" & rst("codigoODT") & ")) ORDER BY ODTitemsRealizados.fechaCreacion;"
+            
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    agregarAEXCELbold "Mano de Obra"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    i = 1
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("Descripcion"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                            
+                        'subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        'Total = Total + (rstM("cant") * rstM("precio"))
+                        
+                        i = i + 1
+                        
+                        rstM.MoveNext
+                    Wend
+                    
+                    'inx = lvListaItems.AddItem("" & vbTab & "" & vbTab & "SubTotal Mano de Obra" & vbTab & Format(Round(subtotal, 2), "$ 0.00"))
+                
+                End If
+            
+                sql = "SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.MaterialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, Observaciones " & _
+                "from ODTItemsMateriales " & _
+                "where (((ODTItemsMateriales.codigoODT) = " & rst("codigoODT") & ")) ORDER BY ODTItemsMateriales.fechaCreacion;"
+                
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    i = 1
+                    subtotal = 0
+                    
+                    agregarAEXCELbold "Lista Materiales"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("materialestxt"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 2), evitarNULL(rstM("Observaciones"))
+                        
+                        subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        
+                        rstM.MoveNext
+                        
+                        i = i + 1
+                    Wend
+                
+                    'agrego la gestion de materiales
+                    If evitarNULL(rst("fechaRealizacion")) = "" Then
+                        f = rst("fechaHoraSolicitud")
+                        f = Now
+                    Else
+                        f = rst("fechaRealizacion")
+                    End If
+                    
+                    CoeficienteGestionMateriales = ObtenerCGC(f)
+                    
+                    gestionMateriales = (subtotal * CoeficienteGestionMateriales)
+                    
+                    agregarAEXCEL CStr(i), "Gestión de Materiales " & CoeficienteGestionMateriales * 100 & "%", "1", FormatCurrency(gestionMateriales, 3), FormatCurrency(gestionMateriales, 3)
+                    
+                End If
+        
+                agregarAEXCELbold "Comentarios"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(evitarNULL(rst("comentariosSG")), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                agregarAEXCEL ""
+                
+            End If
+            
+            rst.MoveNext
+            
+        Wend
+        
+        anchoColumna 1, 5.5
+        anchoColumna 2, 50
+        anchoColumna 6, 20
+        
+    End If
+
+
+    sql = "SELECT comentariosSg, fechaHoraSolicitud, ODTs.fechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio " & _
+    " WHERE (((ODTs.facturaNro) Is Null) AND ((ODTs.activo)) And ((ODTs.completadaEmpresa))) ORDER BY codigoODT DESC;"
+        
+    'selecciono las ODTs que tiene cuentas de pbbpolisur
+    'sql = "SELECT ODTs.ComentariosSG, ODTs.FechaHoraSolicitud, ODTs.FechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) LEFT JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where (((odts.facturaNro) Is Null) And ((odts.activo) = True) And ((odts.CompletadaEmpresa) = True) And ((SistemaCuentas.codigoEmpresa) = 1)) ORDER BY ODTs.codigoODT DESC;"
+    sql = "SELECT ODTs.ComentariosSG, ODTs.FechaHoraSolicitud, ODTs.FechaRealizacion, ODTs.FacturaNro, ODTs.codigoODT, ODTs.Cuenta, ODTs.DescripcionODT, ODTedificios.Edificio, ODTedificios.Planta FROM (ODTs INNER JOIN ODTedificios ON ODTs.codigoEdificio = ODTedificios.codigoEdificio) LEFT JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where (((odts.facturaNro) Is Null) And ((odts.activo)) And ((odts.CompletadaEmpresa)) And ((SistemaCuentas.codigoEmpresa) = 1)) ORDER BY ODTs.codigoODT DESC;"
+        
+    'Debug.Print sql
+
+    Set rst = DbQuery(sql)
+        
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL horizontal
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "PBBPolisur"
+        
+        agregarTituloAExcel "Planilla de Revisión de Trabajos"
+        
+        agregarAEXCEL ""
+        
+        While Not rst.EOF
+        
+            tmo = totalODTmanoDeObra(rst("codigoODT"))
+            tma = totalODTmateriales(rst("codigoODT"))
+            
+            If tma + tmo > 0 Then
+        
+                agregarAEXCELbold "ODT " & rst("codigoODT")
+                mezclarCeldas 1, 2
+                marcarLineaDeCeldas 1, 7, RGB(220, 220, 220)
+                agregarAEXCELbold "", "Edificio", "Cost Center", "Cuenta", "Materiales", "Mano de Obra", "Total"
+                mezclarCeldas 1, 2
+                alinearCeldas 5, 7, derecha
+                agregarSeparadorTablaMediano
+                
+                agregarAEXCEL rst("edificio") & " - " & rst("planta"), "", obtenerCostCenter(evitarNULL(rst("Cuenta"))), evitarNULL(rst("Cuenta")), FormatCurrency(tma, 3), FormatCurrency(tmo, 3), FormatCurrency(tmo + tma, 3)
+                mezclarCeldas 1, 2
+                'agregarAEXCEL rst("codigoODT"), fn, FormatCurrency(Total, 2), rst("Edificio"), rst("planta"), evitarNULL(rst("Cuenta")), obtenerCostCenter(evitarNULL(rst("Cuenta")))
+                
+                agregarAEXCELbold "Descripción de Tareas"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(rst("descripcionODT"), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                ' Imprimo detalle de la ODT
+    
+                sql = "SELECT ODTItems.Descripcion, ODTItems.Precio, ODTitemsRealizados.Cant, ODTitemsRealizados.Observaciones " & _
+                    "FROM ODTitemsRealizados INNER JOIN ODTItems ON ODTitemsRealizados.codigoItem = ODTItems.codigoItem " & _
+                    "WHERE (((ODTitemsRealizados.CodigoODT)=" & rst("codigoODT") & ")) ORDER BY ODTitemsRealizados.fechaCreacion;"
+            
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    agregarAEXCELbold "Mano de Obra"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    i = 1
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("Descripcion"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                            
+                        'subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        'Total = Total + (rstM("cant") * rstM("precio"))
+                        
+                        i = i + 1
+                        
+                        rstM.MoveNext
+                    Wend
+                    
+                    'inx = lvListaItems.AddItem("" & vbTab & "" & vbTab & "SubTotal Mano de Obra" & vbTab & Format(Round(subtotal, 2), "$ 0.00"))
+                
+                End If
+            
+                sql = "SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.MaterialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, Observaciones " & _
+                "from ODTItemsMateriales " & _
+                "where (((ODTItemsMateriales.codigoODT) = " & rst("codigoODT") & ")) ORDER BY ODTItemsMateriales.fechaCreacion;"
+                
+                Set rstM = DbQuery(sql)
+                
+                If Not rstM.EOF Then
+                    
+                    i = 1
+                    subtotal = 0
+                    
+                    agregarAEXCELbold "Lista Materiales"
+                    mezclarCeldas 1, 2
+                    agregarSeparadorTablaMediano
+                    
+                    agregarAEXCELbold "Item", "Descripción", "Cantidad", "Precio", "Total", "Obs"
+                    alinearCeldas 3, 5, derecha
+                    agregarSeparadorTablaMediano
+                    
+                    While Not rstM.EOF
+                        
+                        agregarAEXCEL CStr(i), rstM("materialestxt"), rstM("cant"), FormatCurrency(rstM("precio"), 3), FormatCurrency(rstM("cant") * rstM("precio"), 3), evitarNULL(rstM("Observaciones"))
+                        
+                        subtotal = subtotal + (rstM("cant") * rstM("precio"))
+                        
+                        rstM.MoveNext
+                        
+                        i = i + 1
+                    Wend
+                
+                    'agrego la gestion de materiales
+                    If evitarNULL(rst("fechaRealizacion")) = "" Then
+                        f = rst("fechaHoraSolicitud")
+                        f = Now
+                    Else
+                        f = rst("fechaRealizacion")
+                    End If
+                    
+                    CoeficienteGestionMateriales = ObtenerCGC(f)
+                    
+                    gestionMateriales = (subtotal * CoeficienteGestionMateriales)
+                    
+                    agregarAEXCEL CStr(i), "Gestión de Materiales " & CoeficienteGestionMateriales * 100 & "%", "1", FormatCurrency(gestionMateriales, 3), FormatCurrency(gestionMateriales, 3)
+                    
+                End If
+        
+                agregarAEXCELbold "Comentarios"
+                mezclarCeldas 1, 2
+                agregarSeparadorTablaMediano
+                
+                fn = Replace(evitarNULL(rst("comentariosSG")), Chr(10), "")
+                fn = Replace(fn, Chr(13), "")
+                agregarAEXCEL "", fn
+                mezclarCeldas 2, 7
+                
+                agregarAEXCEL ""
+                
+            End If
+            
+            rst.MoveNext
+            
+        Wend
+        
+        anchoColumna 1, 5.5
+        anchoColumna 2, 50
+        anchoColumna 6, 20
+        
+        
+    End If
+    
+    
+    
+    If init Then finalizaEXCEL
+End Sub
+
+Sub ODT_reporte_itemFactura(numeroFactura As String)
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+
+'items
+    sql = "SELECT precio, Sum(Cant) AS cantidad, Sum(Cant*Precio) AS total, ODTItems.Descripcion, ODTItems.numeroItem " & _
+          "FROM ODTItems INNER JOIN (ODTs INNER JOIN ODTitemsRealizados ON ODTs.codigoODT = ODTitemsRealizados.CodigoODT) ON ODTItems.codigoItem = ODTitemsRealizados.codigoItem " & _
+            "where (((ODTs.facturaNro) = '" & numeroFactura & "'))  " & _
+            "GROUP BY ODTItems.Descripcion, ODTItems.numeroItem , ODTItems.Precio " & _
+            "ORDER BY ODTItems.numeroItem;  "
+
+    Set rst = DbQuery(sql)
+        
+    Total = 0
+    fn = ""
+    If Not rst.EOF Then
+        
+        iniciaEXCEL
+        
+        agregarHojaEXCEL "Items por Factura"
+        
+        agregarTituloAExcel "Listado de Items en Factura " & numeroFactura
+        
+        agregarAEXCEL "Item", "Descripción", "Precio Unitario", "Cantidad", "Total"
+        marcarCamposEXCEL
+        
+        While Not rst.EOF
+            
+            agregarAEXCEL rst("numeroItem"), rst("Descripcion"), rst("precio"), rst("cantidad"), FormatCurrency(rst("Total"), 3)
+            
+            Total = Total + rst("total")
+            rst.MoveNext
+            
+        Wend
+        
+        'materiales
+'        sql = "SELECT Sum([Cant]) AS cantidad, Sum([Cant]*[precio]) AS total,  Min(ODTs.FechaRealizacion) AS MinFechaRealizacion " & _
+'        "FROM ODTItemsMateriales INNER JOIN ODTs ON ODTItemsMateriales.CodigoODT = ODTs.codigoODT " & _
+'        "GROUP BY ODTs.FacturaNro  " & _
+'        "HAVING (((ODTs.FacturaNro)='" & numeroFactura & "')); "
+
+        sql = "SELECT Sum([Cant]*[precio]) AS total, ODTFacturacion.FechaFactura " & _
+        "FROM (ODTItemsMateriales INNER JOIN ODTs ON ODTItemsMateriales.CodigoODT = ODTs.codigoODT) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro " & _
+        "GROUP BY ODTs.FacturaNro, ODTFacturacion.FechaFactura " & _
+        "HAVING (((ODTs.FacturaNro)='" & numeroFactura & "')); "
+
+        Set rst = DbQuery(sql)
+        
+        If Not rst.EOF Then
+            
+            subtotal = rst("Total")
+            subtotal = subtotal + (subtotal * ObtenerCGC(rst("FechaFactura")))
+            
+            agregarAEXCEL "", "Materiales", FormatCurrency(subtotal, 3), "1", FormatCurrency(subtotal, 3)
+            
+            Total = Total + subtotal
+            
+        End If
+        
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "Total", "", "", FormatCurrency(Total, 3)
+        
+        finalizaEXCEL
+    End If
+
+End Sub
+
+Sub ODT_reporte_costCenterFactura(codigoFactura As String)
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim cc As String
+
+    sql = "SELECT ODTs.codigoCuenta, ODTs.codigoODT " & _
+          "FROM ODTs " & _
+            "where (((ODTs.codigoFactura) = " & codigoFactura & "))  " & _
+            "ORDER BY ODTs.codigoCuenta;  "
+
+    Set rst = DbQuery(sql)
+        
+    Total = 0
+    
+    If Not rst.EOF Then
+        
+        iniciaEXCEL
+        
+        agregarHojaEXCEL "Cost Center por Factura"
+        
+        agregarAEXCEL "Cuenta", "Cost Center", "Total"
+        marcarCamposEXCEL
+        subtotal = 0
+        
+        While Not rst.EOF
+        
+            subtotal = subtotal + totalODT(rst("codigoODT"))
+            cc = rst("codigoCuenta")
+            
+            rst.MoveNext
+            
+            If rst.EOF Then
+                agregarAEXCEL cc, cc, FormatCurrency(subtotal, 3)
+                Total = Total + subtotal
+            Else
+                If rst("cuenta") <> cc Then
+                    agregarAEXCEL cc, cc, FormatCurrency(subtotal, 3)
+                    Total = Total + subtotal
+                    subtotal = 0
+                End If
+            End If
+        
+        Wend
+        
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "Total", FormatCurrency(Total, 3)
+        
+        finalizaEXCEL
+    End If
+
+End Sub
+
+Sub ODT_reporte_itemsSelecionados(items As String)
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim odts() As String
+Dim i As Integer
+
+    odts = Split(items, ";")
+    
+    If UBound(odts) > 0 Then
+    
+        iniciaEXCEL
+        
+        agregarHojaEXCEL "Items Seleccionados"
+        
+        agregarAEXCEL "ODT", "Cuenta", "Cost Center", "Total Mano de Obra", "Total Materiales", "Total"
+        marcarCamposEXCEL
+    
+        For i = 0 To UBound(odts) - 1
+            
+            sql = "SELECT * FROM ODTs WHERE codigoODT=" & odts(i)
+            
+            Set rst = DbQuery(sql)
+
+            If Not rst.EOF Then
+                
+                tma = totalODTmateriales(rst("codigoODT"))
+                tmo = totalODTmanoDeObra(rst("codigoODT"))
+                subtotal = tma + tmo
+                
+                agregarAEXCEL rst("codigoODT"), evitarNULL(rst("cuenta")), obtenerCostCenter(evitarNULL(rst("cuenta"))), FormatCurrency(tmo, 3), FormatCurrency(tma, 3), FormatCurrency(subtotal, 3)
+                
+                Total = Total + subtotal
+                
+            End If
+        
+        Next
+    
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "", "", "", "Total", FormatCurrency(Total, 3)
+        
+        finalizaEXCEL
+    
+    End If
+
+End Sub
+
+
+Sub ODT_reporte_ItemsFechaFacturacion(desde As Date, hasta As Date)
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim init As Boolean
+
+    init = False
+    
+    'quitar PARCHE!
+
+'items
+    sql = "SELECT ODTItems.Precio, Sum(ODTitemsRealizados.Cant) AS cantidad, Sum([Cant]*[Precio]) AS total, ODTItems.Descripcion, ODTItems.numeroItem " & _
+    "FROM (ODTItems INNER JOIN (ODTs INNER JOIN ODTitemsRealizados ON ODTs.codigoODT = ODTitemsRealizados.CodigoODT) ON ODTItems.codigoItem = ODTitemsRealizados.codigoItem) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro " & _
+    "where DATE(ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' AND DATE(ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "' " & _
+    "GROUP BY ODTItems.Precio, ODTItems.Descripcion, ODTItems.numeroItem " & _
+    "ORDER BY  ODTItems.numeroItem;"
+    
+    sql = "SELECT ODTItems.Precio, Sum(ODTitemsRealizados.Cant) AS cantidad, Sum(Cant*Precio) AS total, ODTItems.Descripcion, ODTItems.numeroItem FROM ((ODTItems INNER JOIN (ODTs INNER JOIN ODTitemsRealizados ON ODTs.codigoODT = ODTitemsRealizados.CodigoODT) ON ODTItems.codigoItem = ODTitemsRealizados.codigoItem) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where DATE(ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' AND DATE(ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "' And SistemaCuentas.codigoEmpresa = 7 GROUP BY ODTItems.Precio, ODTItems.Descripcion, ODTItems.numeroItem ORDER BY ODTItems.numeroItem;"
+
+    Set rst = DbQuery(sql)
+        
+    Total = 0
+    fn = ""
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "DOW"
+        
+        agregarTituloAExcel "Listado de Items Facturados entre " & Format(desde, "dd/MMM/yy") & " y " & Format(hasta, "dd/MMM/yy")
+        
+        agregarAEXCEL ""
+        
+        agregarAEXCEL "Item", "Descripción", "Precio Unitario", "Cantidad", "Total"
+        marcarCamposEXCEL
+        
+        While Not rst.EOF
+            
+            agregarAEXCEL rst("numeroItem"), rst("Descripcion"), rst("precio"), rst("cantidad"), FormatCurrency(rst("Total"), 3)
+            
+            Total = Total + rst("total")
+            rst.MoveNext
+            
+        Wend
+        
+        'materiales
+        sql = "SELECT Sum([Cant]*[precio]) AS total, ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura " & _
+        "FROM (ODTItemsMateriales INNER JOIN ODTs ON ODTItemsMateriales.CodigoODT = ODTs.codigoODT) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro " & _
+        "where (((ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' And (ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "')) " & _
+        "GROUP BY ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura " & _
+        "ORDER BY ODTFacturacion.FacturaNro;"
+        
+        'Debug.Print sql
+        
+        sql = "SELECT Sum([Cant]*[precio]) AS total, ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura FROM ((ODTItemsMateriales INNER JOIN ODTs ON ODTItemsMateriales.CodigoODT = ODTs.codigoODT) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where (((ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' And (ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "')) GROUP BY ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura, SistemaCuentas.codigoEmpresa Having (((SistemaCuentas.codigoEmpresa) = 7)) ORDER BY ODTFacturacion.FacturaNro;"
+
+        Set rst = DbQuery(sql)
+        
+        subtotal = 0
+        
+        While Not rst.EOF
+            
+            subtotal = subtotal + rst("Total")
+            subtotal = subtotal + (rst("Total") * ObtenerCGC(rst("FechaFactura")))
+            
+            rst.MoveNext
+            
+        Wend
+        
+        Total = Total + subtotal
+        
+        agregarAEXCEL "", "Materiales", FormatCurrency(subtotal, 3), "1", FormatCurrency(subtotal, 3)
+        
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "Total", "", "", FormatCurrency(Total, 3)
+        
+    End If
+    
+    sql = "SELECT ODTItems.Precio, Sum(ODTitemsRealizados.Cant) AS cantidad, Sum(Cant * Precio) AS total, ODTItems.Descripcion, ODTItems.numeroItem FROM ((ODTItems INNER JOIN (ODTs INNER JOIN ODTitemsRealizados ON ODTs.codigoODT = ODTitemsRealizados.CodigoODT) ON ODTItems.codigoItem = ODTitemsRealizados.codigoItem) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where DATE(ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' AND DATE(ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "' AND SistemaCuentas.codigoEmpresa = 1 GROUP BY ODTItems.Precio, ODTItems.Descripcion, ODTItems.numeroItem ORDER BY ODTItems.numeroItem;"
+    
+    'Debug.Print sql
+
+    Set rst = DbQuery(sql)
+        
+    Total = 0
+    fn = ""
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "PBBPolisur"
+        
+        agregarTituloAExcel "Listado de Items Facturados entre " & Format(desde, "dd/MMM/yy") & " y " & Format(hasta, "dd/MMM/yy")
+        
+        agregarAEXCEL ""
+        
+        agregarAEXCEL "Item", "Descripción", "Precio Unitario", "Cantidad", "Total"
+        marcarCamposEXCEL
+        
+        While Not rst.EOF
+            
+            agregarAEXCEL rst("numeroItem"), rst("Descripcion"), rst("precio"), rst("cantidad"), FormatCurrency(rst("Total"), 3)
+            
+            Total = Total + rst("total")
+            rst.MoveNext
+            
+        Wend
+        
+        'materiales
+        sql = "SELECT Sum([Cant]*[precio]) AS total, ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura " & _
+        "FROM (ODTItemsMateriales INNER JOIN ODTs ON ODTItemsMateriales.CodigoODT = ODTs.codigoODT) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro " & _
+        "where (((ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' And (ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "')) " & _
+        "GROUP BY ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura " & _
+        "ORDER BY ODTFacturacion.FacturaNro;"
+        
+        sql = "SELECT Sum(Cant * precio) AS total, ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura FROM ((ODTItemsMateriales INNER JOIN ODTs ON ODTItemsMateriales.CodigoODT = ODTs.codigoODT) INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where DATE(ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "' AND DATE(ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "' GROUP BY ODTFacturacion.FacturaNro, ODTFacturacion.FechaFactura, SistemaCuentas.codigoEmpresa Having SistemaCuentas.codigoEmpresa = 1 ORDER BY ODTFacturacion.FacturaNro;"
+
+        Set rst = DbQuery(sql)
+        
+        subtotal = 0
+        
+        While Not rst.EOF
+            
+            subtotal = subtotal + rst("Total")
+            subtotal = subtotal + (rst("Total") * ObtenerCGC(rst("FechaFactura")))
+            
+            rst.MoveNext
+            
+        Wend
+        
+        Total = Total + subtotal
+        
+        agregarAEXCEL "", "Materiales", FormatCurrency(subtotal, 3), "1", FormatCurrency(subtotal, 3)
+        
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "Total", "", "", FormatCurrency(Total, 3)
+        
+
+    End If
+    
+    If init Then finalizaEXCEL
+
+End Sub
+
+Sub ODT_reporte_costCenterFechaFacturacion(desde As Date, hasta As Date)
+Dim rst As ADODB.Recordset
+Dim Total As Single
+Dim subtotal As Single
+Dim cc As String
+Dim init As Boolean
+
+    init = False
+
+    sql = "SELECT ODTs.codigoCuenta, ODTs.codigoODT FROM (ODTs INNER JOIN ODTFacturacion ON ODTs.codigoFactura = ODTFacturacion.codigoFactura ) INNER JOIN SistemaCuentas ON ODTs.codigoCuenta = SistemaCuentas.codigoCuenta where (((ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "'  And (ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "') And ((SistemaCuentas.codigoEmpresa) = 7)) ORDER BY ODTs.codigoCuenta;"
+
+    Set rst = DbQuery(sql)
+        
+    Total = 0
+    
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "DOW"
+        
+        agregarTituloAExcel "Listado de Cost Center Facturados entre " & Format(desde, "dd/MMM/yy") & " y " & Format(hasta, "dd/MMM/yy")
+        
+        agregarAEXCEL ""
+        
+        agregarAEXCEL "Cuenta", "Descripcion", "Total"
+        marcarCamposEXCEL
+        subtotal = 0
+        
+        While Not rst.EOF
+        
+            subtotal = subtotal + totalODT(rst("codigoODT"))
+            cc = rst("Cuenta")
+            
+            rst.MoveNext
+            
+            If rst.EOF Then
+                agregarAEXCEL cc, cc, FormatCurrency(subtotal, 3)
+                Total = Total + subtotal
+            Else
+                If rst("cuenta") <> cc Then
+                    agregarAEXCEL cc, cc, FormatCurrency(subtotal, 3)
+                    Total = Total + subtotal
+                    subtotal = 0
+                End If
+            End If
+        
+        Wend
+        
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "Total", FormatCurrency(Total, 3)
+        
+    End If
+    
+    sql = "SELECT ODTs.Cuenta, ODTs.codigoODT FROM (ODTs INNER JOIN ODTFacturacion ON ODTs.FacturaNro = ODTFacturacion.FacturaNro) INNER JOIN SistemaCuentas ON ODTs.Cuenta = SistemaCuentas.Cuenta where (((ODTFacturacion.FechaFactura) >= '" & Format(desde, fechaSQL) & "'  And (ODTFacturacion.FechaFactura) <= '" & Format(hasta, fechaSQL) & "') And ((SistemaCuentas.codigoEmpresa) = 1)) ORDER BY ODTs.Cuenta;"
+
+    Debug.Print sql
+
+    Set rst = DbQuery(sql)
+        
+    Total = 0
+    
+    If Not rst.EOF Then
+        
+        If Not init Then
+            iniciaEXCEL
+            ExcelWrapText = True
+            init = True
+        End If
+        
+        agregarHojaEXCEL "PBBPolisur"
+        
+        agregarTituloAExcel "Listado de Cost Center Facturados entre " & Format(desde, "dd/MMM/yy") & " y " & Format(hasta, "dd/MMM/yy")
+        
+        agregarAEXCEL ""
+        
+        agregarAEXCEL "Cuenta", "Cost Center", "Total"
+        marcarCamposEXCEL
+        subtotal = 0
+        
+        While Not rst.EOF
+        
+            subtotal = subtotal + totalODT(rst("codigoODT"))
+            cc = rst("Cuenta")
+            
+            rst.MoveNext
+            
+            If rst.EOF Then
+                agregarAEXCEL cc, cc, FormatCurrency(subtotal, 3)
+                Total = Total + subtotal
+            Else
+                If rst("cuenta") <> cc Then
+                    agregarAEXCEL cc, cc, FormatCurrency(subtotal, 3)
+                    Total = Total + subtotal
+                    subtotal = 0
+                End If
+            End If
+        
+        Wend
+        
+        agregarSeparadorTablaMediano
+        
+        agregarAEXCEL "", "Total", FormatCurrency(Total, 3)
+        
+        
+    
+    End If
+    
+    If init Then finalizaEXCEL
+    
+End Sub

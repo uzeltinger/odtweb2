@@ -1,0 +1,1 @@
+<!--#INCLUDE file= "../../include/config.asp"--><%   Set o = New Odt    if Request.ServerVariables("REQUEST_METHOD") = "POST" then        o.updateControl Request("odt"), Request("data")            end if  %>
