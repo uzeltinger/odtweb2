@@ -62,7 +62,8 @@ Odt = Backbone.Model.extend({
     enviarCorreoConfirmacionODT: 0,
     
     ListaMateriales: null,
-    ListaServicios: null
+    ListaServicios: null,
+    es96mas: 0
   },
 
   validate: function(attributes){
@@ -304,7 +305,9 @@ OdtFullView = Backbone.View.extend({
     'change #CompletadaEmpresa'             : 'toggleCompletadaEmpresa',
     'change #terminadaFisicamente'             : 'toggleCompletadaEmpresa',
     'keyup #ComentariosSG'                  : 'toggleCompletadaEmpresa',
-    'keyup'                                 : 'checkEsc'
+    'keyup'                                 : 'checkEsc',
+	'click input[type=button]#aprobar96mas' : 'aprobar96mas',
+	'click input[type=button]#rechazar96mas': 'rechazar96mas'
     },
     
     checkEsc: function(e) {
@@ -693,6 +696,25 @@ OdtFullView = Backbone.View.extend({
     }
   },
 
+  aprobar96mas: function() {
+    if(confirm("Está seguro que quiere Aprobar la ODT Nro " + this.model.get("codigoODT") + "?")) {
+        this.model.set("Aprobado", 1);
+        this.model.save();  
+        console.log('aprobar96mas');
+        $("#ventana-dialogo").hide();
+        $("a#96mas").click();
+    }
+  },
+
+  rechazar96mas: function() {
+    if(confirm("Está seguro que quiere Rechazar la ODT Nro " + this.model.get("codigoODT") + "?")) {        
+        console.log('rechazar96mas');
+        $("#ventana-dialogo").hide();
+        //location.reload();
+        $("a#96mas").click();
+    }
+  },
+
   updateComboEdificio: function(){
     
       clearCombo('#codigoEdificio');
@@ -896,6 +918,13 @@ OdtView = Backbone.View.extend({
     $(".modal_dialog_content").width("830px");
 
     //$("ul.tabs li", view).removeClass("active");
+    
+    if($("a#96mas").hasClass("current")){        
+        model.set("es96mas",1);
+        console.log('a#96mas has class current');
+    }else{
+        
+    }
     
     $(".modal_dialog_body").html(view);
     

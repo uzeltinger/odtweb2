@@ -206,6 +206,31 @@ Function cantidadOdtsAAuditar(MN)
 	
 End Function
 
+Function cantidadOdts96mas()
+    
+    sql = ""
+    sql = sql & "SELECT count(codigoODT) as cantidad "
+    sql = sql & "FROM odts o "
+    sql = sql & "WHERE activo "
+    sql = sql & "AND definido "
+    sql = sql & "AND iniciado "
+    sql = sql & "AND completadaEmpresa "
+    sql = sql & "AND (Aprobado <> 1) "
+    sql = sql & "AND NOT ISNULL(fechacompletada) "
+    sql = sql & "AND (time_to_sec(timediff(NOW(), fechacompletada )) / 3600) > 96"
+
+    Set RS = DbQuery(sql)
+	
+	if Not (RS.EOF Or RS.BOF) then
+		cantidadOdts96mas = cint(RS("cantidad"))
+	else 
+		cantidadOdts96mas = 9
+	end if
+	
+	RS.close
+	
+End Function
+
 'agrego funcion para contar cantidad a revisar por sergio y carlos
 'Function cantidadOdtsARevisar(MN)
 

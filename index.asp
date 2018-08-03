@@ -78,7 +78,9 @@ ODT Anulada: <img alt="anulada" height="20" src="static/img/icon/odt_anulada.png
 					<li><a href="#" id="pendientes" style="padding: 0 2px 5px 2px;">Pendientes</a></li>
 				<% end if %>   
           <% end if %>   
-		  
+		  <% if usuarioPuede(ODT_puedeGenerarOrden) then %>
+				<li><a href="#" id="96mas" style="padding: 0 2px 5px 2px;">+ 96 hs. <span class="count"><span class="count">0</span></span></a></li>
+			<% end if %>
           <% if usuarioPuede(ODT_puedeDefinir) or usuarioPuede(ODT_puedeAuditar) then %>
               <li><span data-updates-count="9" id="updates_count"><a id="aDefinir" href="#" id="updates_nav">A Definir <% if usuarioPuede(ODT_puedeDefinir) then %><span class="count">0</span><% end if %>
               </a></span></li>

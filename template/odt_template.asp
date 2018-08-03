@@ -361,6 +361,18 @@
             {[ } ]}
             <% end if %>
             
+            {[ if(es96mas != 0 || es96mas != '0') { ]}        
+            <div id="aprobarRechazar" class="aprobar-rechazar">
+              <br><br>
+              <div style="float: left;">
+                <input type="button" id="aprobar96mas" value="Aprobar" class="btn" />
+              </div>
+              <div style="float: left; margin-left: 20px;">
+                <input type="button" id="rechazar96mas" value="Rechazar" class="btn btn-rojo" />
+              </div>
+            </div>
+            {[ } ]}
+            
          </div>
       </div>
     

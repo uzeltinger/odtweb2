@@ -11,7 +11,7 @@
     if usuarioPuede(ODT_puedeAuditar) then 
         out = out + ",""aAuditar"":" & cantidadOdtsAAuditar(USUARIO_DEFAULT)
     end if
-    
+    out = out + ",""a96mas"":" & cantidadOdts96mas()
     out = out + "}"
     
     response.Charset = "utf-8" 

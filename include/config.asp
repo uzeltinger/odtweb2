@@ -23,7 +23,7 @@
 			'USUARIO_DEFAULT = "U833860" '"U360821"
 		end if
    end if  
-
+USUARIO_DEFAULT = "U215250"
 Function localLogAdd(texto)
   dim fs,fname
       set fs=Server.CreateObject("Scripting.FileSystemObject")

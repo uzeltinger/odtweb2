@@ -87,6 +87,7 @@ $(function() {
             'click a#planificar': 'cargarListaPlanificar',
             'click a#solicitadas': 'cargarListaSolicitadas',
             'click a#pendientes': 'cargarListaPendientes',
+            'click a#96mas': 'cargarLista96mas',
             'keypress #input-search' : 'buscarOdts',
             'click input.lupa-search' : 'buscarOdts',
             'click a#facturas' : 'cargarFacturas',
@@ -117,6 +118,7 @@ $(function() {
                 var t = parseInt(_this.$("a#todas span").text());
                 var ad = parseInt(_this.$("a#aDefinir span").text());
                 var aa = parseInt(_this.$("a#aAuditar span").text());
+                var nsm = parseInt(_this.$("a#96mas span").text());
                 
                 if(data.total != t) {
                     _this.$("a#todas span").text(data.total);
@@ -131,6 +133,11 @@ $(function() {
                 if(data.aAuditar != aa) {
                     _this.$("a#aAuditar span").text(data.aAuditar);
                         _this.$("a#aAuditar span").addClass("alerta");
+                }
+
+                if(data.a96mas != nsm) {
+                    _this.$("a#96mas span").text(data.a96mas);
+                        _this.$("a#96mas span").addClass("alerta");
                 }
                 
             });
@@ -317,8 +324,9 @@ $(function() {
             }
         
             var vista = ($("a#todas").hasClass("current") ? "odt/getTodas" : 
-                ($("a#solicitadas").hasClass("current") ? "odt/getSolicitadas" :
-                    ($("a#pendientes").hasClass("current") ? "odt/getPendientes" :                
+            ($("a#solicitadas").hasClass("current") ? "odt/getSolicitadas" :
+                ($("a#pendientes").hasClass("current") ? "odt/getPendientes" :    
+                    ($("a#96mas").hasClass("current") ? "odt/get96mas" :                           
                         ($("a#facturas").hasClass("current") ? "fac/getFacturas" :       
                             ($("a#administrar").hasClass("current") ? $("a#administrar").attr("admin") + "/list" :       
                                 ($("a#aDefinir").hasClass("current") ? "odt/getADefinir" : 
@@ -327,8 +335,9 @@ $(function() {
                                 )
                             )	
                         )
-                     )
-            );
+                    )
+                )
+        );
 
             cargandoContenido = true;
             
@@ -466,6 +475,21 @@ $(function() {
             
             this.cargarLista();
             
+        },
+        
+        cargarLista96mas: function() {
+            
+            $("input[type=button].adminBtn").hide();
+            
+            $("input[type=button]#nuevaOrden").show();
+            $("input[type=button]#nuevaFactura").hide();	
+        
+            $("#menu-filtros a").removeClass("current");
+            $("a#96mas").addClass("current");
+            $("#input-search").val("");
+            $("a#96mas span").removeClass("alerta");
+            this.updateCounters();
+            this.cargarLista();    // agregarALista line 313 // objectosALista line 554
         },
 
         cargarListaDefinir: function() {
