@@ -686,5 +686,99 @@ Public Sub get96mas(fromCodigoODT, search)
     SqlOdtToJSON sql
   End Sub
 
+
+Public Sub getColumnasDelInforme(codigoInforme)              
+    'response.Charset = "utf-8" 
+    response.Charset = "iso8859-1" 
+    response.ContentType = "application/json" 
+    'informeABuscar = " codigoInforme = "& codigoInforme 
+    
+    Dim out, isFirstItem, comma, codigoODT, sql, f, cgc, ttt, sqlCheck
+
+    sqlCheck = "SELECT idInfoCol FROM odtinformecolumna WHERE idInforme = " & codigoInforme
+    Set rst = DbQuery(sqlCheck)
+    
+    if recordCount(rst) = 0 then 
+        sqlInsertNew = ""
+        sqlInsertNew = sqlInsertNew & "INSERT INTO odtinformecolumna (idInfoCol, idInforme, idColumna, nombreColumna, colMostrar, colNombre, colFiltrar, colFiltro) VALUES "
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", ""codigoODT"", ""codigoODT"", 0, """", 0, """"),"        
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'codigoPlanta', 'codigoPlanta', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'codigoPrioridad', 'codigoPrioridad', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'codigoEdificio', 'codigoEdificio', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'FechaHoraSolicitud', 'FechaHoraSolicitud', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'MNSolicitante', 'MNSolicitante', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'MNAprobador', 'MNAprobador', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'MNcontacto', 'MNcontacto', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'Cuenta', 'Cuenta', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'codigoCuenta', 'codigoCuenta', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'codigoTipoTarea', 'codigoTipoTarea', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'DescripcionODT', 'DescripcionODT', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'UbicacionTarea', 'UbicacionTarea', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'FechaRealizacion', 'FechaRealizacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'FechaPlanificacion', 'FechaPlanificacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'CompletadaEmpresa', 'CompletadaEmpresa', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'Aprobado', 'Aprobado', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'ComentariosSG', 'ComentariosSG', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'FacturaNro', 'FacturaNro', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'ParaFacturar', 'ParaFacturar', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'codigoFactura', 'codigoFactura', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'ParaRevisar', 'ParaRevisar', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'MNdefinidor', 'MNdefinidor', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'fechaDefinicion', 'fechaDefinicion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'definido', 'definido', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'presupuestar', 'presupuestar', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'MNAnulacion', 'MNAnulacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'fechaAnulacion', 'fechaAnulacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'mnCreacion', 'mnCreacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'fechaCreacion', 'fechaCreacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'fechaModificacion', 'fechaModificacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'fechaCompletada', 'fechaCompletada', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'mnModificacion', 'mnModificacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'iniciado', 'iniciado', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'auditado', 'auditado', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'terminadaFisicamente', 'terminadaFisicamente', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'estado', 'estado', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'activo', 'activo', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'clasificacion', 'clasificacion', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'revisada', 'revisada', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'revisada_por', 'revisada_por', 0, '', 0, ''),"
+        sqlInsertNew = sqlInsertNew & "(null, "&codigoInforme&", 'electrica', 'electrica', 0, '', 0, '');"
+        
+        Set rst = DbQuery(sqlInsertNew)
+    end if
+
+
+    
+    out = "["
+    
+    sql = "SELECT * FROM odtinformecolumna WHERE idInforme = " & codigoInforme
+    'sql = sql & "WHERE "& informeABuscar  
+    Set RS = DbQuery(sql)
+    ttt = 0
+    if Not (RS.EOF Or RS.BOF) then
+        While Not (RS.EOF Or RS.BOF)     
+     
+            out = out & "{""idColumna"": """& RS("idColumna") &""","
+            out = out & " ""nombreColumna"": """& RS("nombreColumna") &""","
+            out = out & " ""colMostrar"": """& RS("colMostrar") &""","
+            out = out & " ""colNombre"": """& RS("colNombre") &""","
+            out = out & " ""colFiltrar"": """& RS("colFiltrar") &""","
+            out = out & " ""colFiltro"": """& RS("colFiltro") &""","
+            out = out & " ""total"": "& ttt &"},"
+            ttt = ttt + 1
+
+        RS.MoveNext
+        wend
+      out = left(out, Len(out) -1)
+    end if     
+    
+    out = out & "]"
+    response.Charset = "utf-8" 
+    'response.Charset = "iso8859-1" 
+    response.ContentType = "application/json" 
+    response.write(out)
+  
+  End Sub
+
 End Class
 %>

@@ -13,6 +13,7 @@
     <link rel="stylesheet" type="text/css" href="static/css/tabs.css">  
     <link rel="stylesheet" type="text/css" href="static/css/materiales.css">  
     <link rel="stylesheet" type="text/css" href="static/css/facturas.css">  
+    <link rel="stylesheet" type="text/css" href="static/css/informes.css">  
     <link rel="stylesheet" type="text/css" href="static/css/ui-lightness/jquery-ui-1.8.24.custom.css">  
 
 
@@ -32,6 +33,7 @@
     <script src="static/js/modelAndView/material.js"></script>
     <script src="static/js/modelAndView/servicios.js"></script>
     <script src="static/js/modelAndView/facturas.js"></script>
+    <script src="static/js/modelAndView/informes.js"></script>
     <script src="static/js/modelAndView/edificios.js"></script>
     <script src="static/js/modelAndView/planificar.js"></script>
     <script src="static/js/modelAndView/control_de_obra.js"></script>

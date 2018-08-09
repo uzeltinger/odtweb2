@@ -1,0 +1,31 @@
+li.informeRow {
+    padding-left: 5px;
+    margin-left: 0;
+    border-bottom: 1px #E6E6E6 solid;
+    float: left;
+    width: 100%;
+    cursor: pointer;
+}
+div.iRow div {
+    float: left;
+    overflow: hidden;
+    height: 25px;
+}
+li.informeRow:hover {
+    background-color: #F2F0E9;
+    cursor: pointer;
+}
+div.edicionInformeDatos {
+    width: 630px;
+    margin-bottom: 10px;
+}
+.InformesColumnsContainer {
+    padding: 15px;
+
+}
+.InformesColumnsContainer table tr td {
+    padding: 3px;
+}
+.InformesColumnsContainer table tr.tr0 {
+    background: #F2F0E9;
+}

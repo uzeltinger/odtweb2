@@ -82,6 +82,7 @@ $(function() {
         events: {
             'click input[type=button]#nuevaOrden' : 'nuevaOrden',
             'click input[type=button]#nuevaFactura' : 'nuevaFactura',
+            'click input[type=button]#nuevoInforme' : 'nuevoInforme',
             'click a#aDefinir': 'cargarListaDefinir',
             'click a#aAuditar': 'cargarListaAuditar',
             'click a#planificar': 'cargarListaPlanificar',
@@ -91,6 +92,7 @@ $(function() {
             'keypress #input-search' : 'buscarOdts',
             'click input.lupa-search' : 'buscarOdts',
             'click a#facturas' : 'cargarFacturas',
+            'click a#informes' : 'cargarInformes',
             'click a#todas': 'cargarListaTodas',
             'click a#edificios' : 'cargarEdificios',
             'click a#administrar' : 'cargarAdministrar',
@@ -304,9 +306,26 @@ $(function() {
             $("input[type=button]#nuevaOrden").hide();
             $("input[type=button].adminBtn").hide();
             $("input[type=button]#nuevaFactura").show();	
+            $("input[type=button]#nuevoInforme").hide();
 
             $("#menu-filtros a").removeClass("current");
             $("a#facturas").addClass("current");
+            $("#input-search").val("");
+
+            $("#listaOdt").empty();
+            ultimaMostrada = 0;
+            this.agregarALista();    
+        
+        },
+
+        cargarInformes: function() {
+        
+            $("input[type=button]#nuevaOrden").hide();
+            $("input[type=button].adminBtn").hide();
+            $("input[type=button]#nuevoInforme").show();	
+
+            $("#menu-filtros a").removeClass("current");
+            $("a#informes").addClass("current");
             $("#input-search").val("");
 
             $("#listaOdt").empty();
@@ -327,13 +346,15 @@ $(function() {
             ($("a#solicitadas").hasClass("current") ? "odt/getSolicitadas" :
                 ($("a#pendientes").hasClass("current") ? "odt/getPendientes" :    
                     ($("a#96mas").hasClass("current") ? "odt/get96mas" :                           
-                        ($("a#facturas").hasClass("current") ? "fac/getFacturas" :       
-                            ($("a#administrar").hasClass("current") ? $("a#administrar").attr("admin") + "/list" :       
-                                ($("a#aDefinir").hasClass("current") ? "odt/getADefinir" : 
-                                    ($("a#aAuditar").hasClass("current") ? "odt/getAAuditar" : "")
+                        ($("a#facturas").hasClass("current") ? "fac/getFacturas" :                
+                            ($("a#informes").hasClass("current") ? "inf/getInformes" : 
+                                ($("a#administrar").hasClass("current") ? $("a#administrar").attr("admin") + "/list" :       
+                                    ($("a#aDefinir").hasClass("current") ? "odt/getADefinir" : 
+                                        ($("a#aAuditar").hasClass("current") ? "odt/getAAuditar" : "")
+                                        )
                                     )
-                                )
-                            )	
+                                )	
+                            )
                         )
                     )
                 )
@@ -367,7 +388,11 @@ $(function() {
                             if (vista == "fac/getFacturas") {
                                 _app.objectosALista(estaLista, Factura, FacturaView);
                             } else {
+                                if (vista == "inf/getInformes") {
+                                    _app.objectosALista(estaLista, Informe, InformeView);
+                                } else {
                                 _app.objectosALista(estaLista, Odt, OdtView);
+                                }
                             }
                         }
                     }
@@ -423,6 +448,20 @@ $(function() {
             
         },
 
+        nuevoInforme: function() {         
+            var blankInforme = new Informe({"codigoInforme": "0", "mnCreacion": USUARIO_DEFAULT}); 
+             var blankInformeViewFull = new InformeEditarView({model: blankInforme, cargarColumnasAlInforme: false});
+             var view = blankInformeViewFull.render().el;             
+             $('#desdeInforme', view).datepicker({
+                 dateFormat: 'dd-mm-yy'
+             });    
+             $('#hastaInforme', view).datepicker({
+                dateFormat: 'dd-mm-yy'
+            });           
+             $(".modal_dialog_body").html(view);   
+             $(".modal_dialog_content").width("650px");
+             $("#ventana-dialogo").show();             
+         },
          
         nuevaOrden: function() {
         
@@ -452,7 +491,8 @@ $(function() {
             $("input[type=button].adminBtn").hide();
             
             $("input[type=button]#nuevaOrden").show();
-            $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevaFactura").hide();		
+            $("input[type=button]#nuevoInforme").hide();
         
             $("#menu-filtros a").removeClass("current");
             $("a#solicitadas").addClass("current");
@@ -468,6 +508,7 @@ $(function() {
             
             $("input[type=button]#nuevaOrden").show();
             $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevoInforme").hide();	
         
             $("#menu-filtros a").removeClass("current");
             $("a#pendientes").addClass("current");
@@ -483,6 +524,7 @@ $(function() {
             
             $("input[type=button]#nuevaOrden").show();
             $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevoInforme").hide();	
         
             $("#menu-filtros a").removeClass("current");
             $("a#96mas").addClass("current");
@@ -498,6 +540,7 @@ $(function() {
         
             $("input[type=button]#nuevaOrden").show();
             $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevoInforme").hide();	
             
             $("#menu-filtros a").removeClass("current");
             $("a#aDefinir").addClass("current");
@@ -514,6 +557,7 @@ $(function() {
         
             $("input[type=button]#nuevaOrden").show();
             $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevoInforme").hide();	
             
             $("#menu-filtros a").removeClass("current");
             $("a#aAuditar").addClass("current");
@@ -528,6 +572,7 @@ $(function() {
             $("input[type=button].adminBtn").hide();
             $("input[type=button]#nuevaOrden").hide();
             $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevoInforme").hide();	
             
             $("#menu-filtros a").removeClass("current");
             $("a#planificar").addClass("current");
@@ -547,7 +592,8 @@ $(function() {
             $("input[type=button].adminBtn").hide();
         
             $("input[type=button]#nuevaOrden").show();
-            $("input[type=button]#nuevaFactura").hide();	
+            $("input[type=button]#nuevaFactura").hide();		
+            $("input[type=button]#nuevoInforme").hide();
         
             $("#menu-filtros a").removeClass("current");
             $("a#todas").addClass("current");

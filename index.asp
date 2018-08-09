@@ -63,7 +63,7 @@ ODT Anulada: <img alt="anulada" height="20" src="static/img/icon/odt_anulada.png
 
       <div id="project-header" style="height: 21px;padding-bottom: 8px;margin-top:8px">
         
-          <ul id="menu-filtros" style="width: 780px">
+          <ul id="menu-filtros" style="width: 800px">
                
 			   <li><span id="comments_count"><a id="todas" href="#" class="current">Todas <span class="count"><%= cantidadOdtsTodas(USUARIO_DEFAULT) %></span></a></span></li>
 
@@ -106,9 +106,15 @@ ODT Anulada: <img alt="anulada" height="20" src="static/img/icon/odt_anulada.png
           <li><a id="administrar" href="#" >Administrar</a></li>
           <% end if %>
 
+          <% if usuarioPuede(ODT_puedeAdministrar) then %>
+          <li><a id="informes" href="#" >Informes</a></li>
+          <% end if %>
+
         </ul>
-        <ul style="width: 354px; margin-left: 593px; text-align: right;">
+        <ul style="text-align: right;">
         
+        <input type="button" id="nuevoInforme" value="Nuevo Informe" class="btn" style="display:none; position: relative;top: -6px;" />
+
           <% if usuarioPuede(ODT_puedeFacturar) Then %>
           <input type="button" id="nuevaFactura" value="Nueva Factura" class="btn" style="display:none; position: relative;top: -6px;" />
           <% end if %>
@@ -192,6 +198,7 @@ ODT Anulada: <img alt="anulada" height="20" src="static/img/icon/odt_anulada.png
     <!--#INCLUDE file= "template/odt_template.asp"-->
     <!--#INCLUDE file= "template/serviciosMaterialesTemplate.asp"-->
     <!--#INCLUDE file= "template/facturas_template.asp"-->
+    <!--#INCLUDE file= "template/informes_template.asp"-->
     <!--#INCLUDE file= "template/admin_template.asp"-->
     <!--#INCLUDE file= "template/planificar_template.asp"-->
     <!--#INCLUDE file= "template/control_de_obra_template.asp"-->

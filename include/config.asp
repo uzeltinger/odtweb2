@@ -29,9 +29,9 @@ Function localLogAdd(texto)
       set fs=Server.CreateObject("Scripting.FileSystemObject")
 
       if PROD then
-        set fname=fs.OpenTextFile("C:\Inetpub\wwwroot\odtweb\log.txt", 8) ' 8=append 2=create      
+        set fname=fs.OpenTextFile("E:\iis\odt\local\odtweb\localLogAdd.txt", 8) ' 8=append 2=create      
       else
-        set fname=fs.OpenTextFile("E:\xampp70\htdocs\sieder\ordenesdetrabajo\odtweb\log.txt", 8) ' 8=append 2=create
+        set fname=fs.OpenTextFile("E:\iis\odt\local\odtweb\localLogAdd.txt", 8) ' 8=append 2=create
       end if
       fname.WriteLine(texto)
       fname.Close
@@ -73,6 +73,7 @@ End Function
 <!--#INCLUDE file= "../models/materiales.asp"-->
 <!--#INCLUDE file= "../models/servicios.asp"-->
 <!--#INCLUDE file= "../models/facturas.asp"-->
+<!--#INCLUDE file= "../models/informes.asp"-->
 <!--#INCLUDE file= "../models/edificio.asp"-->
 <!--#INCLUDE file= "../models/servicio.asp"-->
 
