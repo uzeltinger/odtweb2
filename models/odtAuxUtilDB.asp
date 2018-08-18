@@ -76,7 +76,7 @@ Sub listarPrioridades()
 end Sub
 
 ' T SISTEMA --------------------------------------------
-Sub listarCuentas(aprobador)
+Sub listarCuentas(aprobador) 
     where = ""
     if aprobador <> "" then where = " AND sca.MNaprobador = '"& aprobador &"'"
     'á
@@ -93,6 +93,10 @@ Sub listarCuentas(aprobador)
   
 end Sub
 
+Sub listarTareas()
+    sql = "select codigoTipoTarea as id, Nombre as text from odttipotareas WHERE activo ORDER BY Nombre" 
+  QueryToJSON(conexion, sql).Flush  
+end Sub
 
 sub renderSelectPlantas()
 	

@@ -152,8 +152,40 @@ InformeView = Backbone.View.extend({
         rows += '<td>' + obj.idColumna + '</td>';         
         rows += '<td><input type="checkbox" name="colMostrar_' + obj.idColumna + '" value="'+obj.colMostrar+'" '+colMostrarCheked+' class="fieldInforme" onClick="if(this.checked==true){this.value=\'1\'}else{this.value=\'0\'}"></td>';            
         rows += '<td><input type="text" name="colNombre_' + obj.idColumna + '" value="' + obj.colNombre + '" class="fieldInforme"></td>'; 
-        rows += '<td><input type="checkbox" name="colFiltrar_' + obj.idColumna + '" value="'+obj.colFiltrar+'" '+colFiltrarCheked+' class="fieldInforme" onClick="if(this.checked==true){this.value=\'1\'}else{this.value=\'0\'}"></td>'; 
-        rows += '<td><input type="text" name="colFiltro_' + obj.idColumna + '" value="' + obj.colFiltro + '" class="fieldInforme"></td>'; 
+        rows += '<td><input type="checkbox" name="colFiltrar_' + obj.idColumna + '" value="'+obj.colFiltrar+'" '+colFiltrarCheked+' class="fieldInforme colFiltrar_' + obj.idColumna + '" onClick="if(this.checked==true){this.value=\'1\'}else{this.value=\'0\'}"></td>'; 
+        rows += '<td>'
+        let mostrarInput = true;
+
+        
+        if(obj.idColumna=='codigoPlanta'){
+          let codigoCuentaSelected = obj.colFiltro;
+          rows += '<input type="hidden" name="codigoPlantaSelected" id="codigoPlantaSelected" value="' + obj.colFiltro + '"><a id="plantaComboLlenar" style="display: none;">aaa</a><select class="fieldInforme" style="opacity:.5; width: 200px;" id="plantaCombo" name="colFiltro_' + obj.idColumna + '" class="comboboxDefaults"></select>';
+          mostrarInput = false;
+        }
+        
+        if(obj.idColumna=='codigoEdificio'){
+          let codigoEdificioSelected = obj.colFiltro;
+          rows += '<input type="hidden" name="codigoEdificioSelected" id="codigoEdificioSelected" value="' + obj.colFiltro + '"><a id="edificioComboLlenar" style="display: none;">aaa</a><select class="fieldInforme" style="opacity:.5; width: 200px;" id="codigoEdificio" name="colFiltro_' + obj.idColumna + '" class="comboboxDefaults"></select>';
+          mostrarInput = false;
+        }
+        
+        if(obj.idColumna=='codigoCuenta'){
+          let codigoCuentaSelected = obj.colFiltro;
+          rows += '<input type="hidden" name="codigoCuentaSelected" id="codigoCuentaSelected" value="' + obj.colFiltro + '"><a id="cuentaComboLlenar" style="display: none;">aaa</a><select class="fieldInforme" style="opacity:.5; width: 200px;" id="cuentaCombo" name="colFiltro_' + obj.idColumna + '" class="comboboxDefaults"></select>';
+          mostrarInput = false;
+        }
+        
+        if(obj.idColumna=='codigoTipoTarea'){
+          let codigoCuentaSelected = obj.colFiltro;
+          rows += '<input type="hidden" name="codigoTipoTareaSelected" id="codigoTipoTareaSelected" value="' + obj.colFiltro + '"><a id="tipoTareaComboLlenar" style="display: none;">aaa</a><select class="fieldInforme" style="opacity:.5; width: 200px;" id="codigoTipoTarea" name="colFiltro_' + obj.idColumna + '" class="comboboxDefaults"></select>';
+          mostrarInput = false;
+        }
+        
+        if(mostrarInput){
+          rows += '<input type="text" name="colFiltro_' + obj.idColumna + '" value="' + obj.colFiltro + '" class="fieldInforme">';
+        }        
+        
+        rows += '</td>'; 
         rows += '</tr>';     
       });   
 
@@ -163,7 +195,10 @@ InformeView = Backbone.View.extend({
 
       var tableHtml = tableHtml + rows + '</table>';
       $('#listadoColumnas').append(tableHtml);
-      
+      $('#plantaComboLlenar').click();
+      $('#edificioComboLlenar').click();
+      $('#tipoTareaComboLlenar').click();
+      $('#cuentaComboLlenar').click();//updateCuenta();
       //console.log('rows',rows);  
 
     })
@@ -179,13 +214,13 @@ InformeView = Backbone.View.extend({
 
     
       $(".modal_dialog_content #modal_dialog_title").html("<span style='font-weight:normal;'>Cargar Columnas en el </span><span>Informe Nro " + model.get("numeroInforme") + "</span>");
-      $(".modal_dialog_body").html(view);   
+      $(".modal_dialog_body").html(view);         
       $(".modal_dialog_content").width("850px");      
-      $("#ventana-dialogo").show();
+      $("#ventana-dialogo").show();      
   },
   generarInforme: function(){
     console.log('generarInforme');
-  }
+  },
 }); // InformeView
 
 
@@ -238,7 +273,12 @@ InformeEditarView = Backbone.View.extend({
   },  
 
   events: {
-    'click #updateInforme' : 'updateInforme'
+    'click #updateInforme' : 'updateInforme',
+    "click #cuentaComboLlenar" : "updateCuenta",
+    "click #plantaComboLlenar" : "updateComboPlanta",
+    "click #edificioComboLlenar" : "loadComboEdificio",
+    "click #tipoTareaComboLlenar" : "updateComboTipoTarea",
+    "change #plantaCombo" : "updateComboEdificio"
   },  
 
   updateInforme: function(evento) {
@@ -253,6 +293,46 @@ InformeEditarView = Backbone.View.extend({
     this.model.save();
     $("a#informes").click();
     $("#ventana-dialogo").hide();
-  }
+  },
+  updateComboPlanta: function(idPlanta){
+    console.log('updateComboPlanta');
+    let codigoPlantaSelected = $('#codigoPlantaSelected').val();  
+    $('#plantaCombo').removeAttr('disabled');
+    $('#plantaCombo').css('opacity', 1); 
+    loadComboData($('#plantaCombo'),'api/getPlantas.asp', "", codigoPlantaSelected);
+  },
+  updateCuenta: function(){
+    console.log('updateCuenta');
+    console.log('cuentaCombo.val',$('#cuentaCombo').val());
+    //$('#cuentaCombo').val();
+      clearCombo('#cuentaCombo');
+      let codigoCuentaSelected = $('#codigoCuentaSelected').val();  
+      //let cuentas = 
+      loadComboData($('#cuentaCombo'),'api/getCuentas.asp', "", codigoCuentaSelected);
+      $('#cuentaCombo').removeAttr('disabled');
+      $('#cuentaCombo').css('opacity', 1);      
+    },
+    updateComboEdificio: function(){  
+      console.log('updateComboEdificio');  
+      clearCombo('#codigoEdificio');
+      loadComboData($('#codigoEdificio'),'api/getEdificios.asp', $("#plantaCombo").val(), "");  
+      $('#codigoEdificio').removeAttr('disabled');
+      $('#codigoEdificio').css('opacity', 1);
+    },
+    loadComboEdificio: function(){   
+      let codigoPlantaSelected = $('#codigoPlantaSelected').val();  
+      let codigoEdificioSelected = $('#codigoEdificioSelected').val();
+      loadComboData($('#codigoEdificio'),'api/getEdificios.asp', codigoPlantaSelected, codigoEdificioSelected);
+      $('#codigoEdificio').removeAttr('disabled');
+      $('#codigoEdificio').css('opacity', 1);
+    },
+    updateComboTipoTarea: function(){
+      console.log('updateComboTipoTarea');  
+      let codigoTipoTareaSelected = $('#codigoTipoTareaSelected').val();
+      loadComboData($('#codigoTipoTarea'),'api/getTipoTareas.asp', "", codigoTipoTareaSelected);
+      $('#codigoTipoTarea').removeAttr('disabled');
+      $('#codigoTipoTarea').css('opacity', 1);
+      //$("#codigoTipoTarea").val(codigoTipoTarea);
+    }
 
 });
