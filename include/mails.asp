@@ -326,10 +326,13 @@ Function ODT_mail_aprobacion(codigoODT)
 		
  ' Listado de Mat
         
-        Set rst = DbQuery("SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.CodigoODT, ODTItemsMateriales.materialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, ODTItemsMateriales.Observaciones FROM ODTItemsMateriales WHERE ODTItemsMateriales.CodigoODT = " & codigoODT & "; ")
+        Set rst = DbQuery("SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.CodigoODT, ODTItemsMateriales.materialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, ODTItemsMateriales.Observaciones , ODTItemsMateriales.NroFactura FROM ODTItemsMateriales WHERE ODTItemsMateriales.CodigoODT = " & codigoODT & " order by NroFactura ASC; ")
         		
         If recordCount(rst) > 0 Then
-        
+        totalDeLaOrden = 0
+        totalDeLaFactura = 0
+        codigoFacturaAnterior = 0
+
             s = s & "<FONT face=Arial color=#000000 size=3>"
             s = s & "<b>DETALLE de Materiales utilizados:</B><BR>"
             s = s & "</FONT>"
@@ -342,6 +345,23 @@ Function ODT_mail_aprobacion(codigoODT)
             
             i = 1
             While Not rst.EOF
+                precioMateriales = (rst("cant") * rst("Precio"))
+                if codigoFacturaAnterior = rst("NroFactura") Then
+                    totalDeLaFactura = totalDeLaFactura + precioMateriales
+                    totalUltimaFactura = totalDeLaFactura
+                else
+                    'calcular % de agregado	0,22 0,17 5.000			
+                    if totalDeLaFactura >= CGCobtenerImporte(now) then
+                        totalDeLaFactura = totalDeLaFactura * (1 + CGCobtenerCGC2(now))
+                    else
+                        totalDeLaFactura = totalDeLaFactura * (1 + CGCobtenerCGC1(now))					
+                    end if
+                    totalDeLaOrden = totalDeLaOrden + totalDeLaFactura
+                    totalDeLaFactura = precioMateriales
+                    totalUltimaFactura = totalDeLaFactura
+                end if
+                codigoFacturaAnterior = rst("NroFactura")
+
                 Total = Total + (rst("cant") * rst("Precio"))
                 
 				'TotalCGC = TotalCGC + (rst("cant") * rst("Precio")) * CGC
@@ -357,6 +377,14 @@ Function ODT_mail_aprobacion(codigoODT)
                 rst.MoveNext
             Wend
 
+            'calcular % de agregado para la ultima factura que no entra en el ciclo'				
+            if totalUltimaFactura >= CGCobtenerImporte(now) then
+                totalUltimaFactura = totalUltimaFactura * (1 + CGCobtenerCGC2(now))	
+            else
+                totalUltimaFactura = totalUltimaFactura * (1 + CGCobtenerCGC1(now))
+            end if
+	        totalDeLaOrden = totalDeLaOrden + totalUltimaFactura
+            'response.write "totalDeLaOrden: " & totalDeLaOrden
 
             if Total >= CGCobtenerImporte(fr) then
                 TotalCGC = Total * CGCobtenerCGC2(fr)
@@ -365,15 +393,18 @@ Function ODT_mail_aprobacion(codigoODT)
             end if
 			
             
-            TotalMat = Total + TotalCGC
+            'TotalMat = Total + TotalCGC
+            TotalMat = totalDeLaOrden
             
             s = s & "</table>"
             
             s = s & "<BR>"
             
             s = s & "<FONT face=Arial color=#000000 size=2>"
-            s = s & " <b>Total de Materiales: " & FormatCurrency(TotalMat - TotalCGC) & "</b></p>"
-            s = s & " <b>Total de Gestión de Materiales: " & FormatCurrency(TotalCGC) & "</font></b></p>"
+            's = s & " <b>Total de Materiales: " & FormatCurrency(TotalMat - TotalCGC) & "</b></p>"
+            s = s & " <b>Total de Materiales: " & FormatCurrency(Total) & "</b></p>"
+            's = s & " <b>Total de Gestión de Materiales: " & FormatCurrency(TotalCGC) & "</font></b></p>"
+            s = s & " <b>Total de Gestión de Materiales: " & FormatCurrency(totalDeLaOrden - Total) & "</font></b></p>"
             s = s & "<BR>"
         
         Else
@@ -427,6 +458,7 @@ Function ODT_mail_aprobacion(codigoODT)
         s = s & "<P>Muchas Gracias. " & "<BR>"
         s = s & "</FONT>"
         
+        'response.write s        
         sendmail USUARIO_DEFAULT, "amillach@dow.com;" & rstODT("MNsolicitante") , "ODT | Aprobación de la Orden de Trabajo Nro: " & codigoODT, s
 		
     End If
