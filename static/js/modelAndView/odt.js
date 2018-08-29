@@ -928,10 +928,11 @@ OdtView = Backbone.View.extend({
     //$("ul.tabs li", view).removeClass("active");
     
     if($("a#96mas").hasClass("current")){        
-        model.set("es96mas",1);
+        //model.set("es96mas",1);
+        $("#aprobarRechazar", view).addClass("mostrar");
         console.log('a#96mas has class current');
     }else{
-        
+        $("#aprobarRechazar", view).removeClass("mostrar");
     }
     
     $(".modal_dialog_body").html(view);

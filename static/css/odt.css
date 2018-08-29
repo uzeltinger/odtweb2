@@ -472,3 +472,5 @@ background-color: #BFB;
 .control-obra-view li.row.si:hover {
 background-color: #89FF89;
 }
+#aprobarRechazar { display: none;}
+#aprobarRechazar.mostrar { display: block;}
