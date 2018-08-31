@@ -219,6 +219,7 @@ Function cantidadOdts96mas()
     sql = sql & "AND definido "
     sql = sql & "AND iniciado "
     sql = sql & "AND completadaEmpresa "
+    sql = sql & "AND terminadaFisicamente = -1 "   
     sql = sql & "AND (Aprobado <> 1) "
     sql = sql & "AND NOT ISNULL(fechacompletada) "
     sql = sql & "AND (time_to_sec(timediff(NOW(), fechacompletada )) / 3600) > 96"

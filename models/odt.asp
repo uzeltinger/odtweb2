@@ -637,52 +637,21 @@ Class Odt
     response.write(recordCount(rst))
   End Sub
 
-Public Sub get96mas(fromCodigoODT, search)
-	where = "NOT completadaEmpresa AND o.activo"
-    
-	if fromCodigoODT > 0 then 
-		where = where & " AND codigoODT < "& fromCodigoODT 
-	end if
-	
-		
-	if usuarioPuede(ODT_puedeAdministrar) or usuarioPuede(ODT_puedeAuditar) then 
-	else
-		if usuarioPuede(ODT_puedeCargarDetalle) then	
-			where = where & " AND o.definido AND o.activo AND o.iniciado "
-		else
-			where = where & " AND o.MNSolicitante = '"& USUARIO_DEFAULT &"'"	
-		end if
-
-	end if
-	
-	if search <> "" then
-		where = where & " AND (su.Nombre  like '%" & search & "%' OR o.codigoODT like '%" & search & "%' OR o.DescripcionODT like '%" & search & "%' OR su1.Nombre  like '%" & search & "%')"
-	end if
-
-    sql = "SELECT o.*, "
-    sql = sql & "su.Nombre as nombreSolicitante "
-    sql = sql & "FROM (odts o "
-    sql = sql & "INNER JOIN sistemausuarios su ON su.MN = o.MNSolicitante )"
-	sql = sql & "LEFT JOIN sistemausuarios su1 ON o.MNdefinidor = su1.MN "
-    sql = sql & "WHERE " & where 
-    sql = sql & " ORDER BY codigoODT DESC "
-    sql = sql & "LIMIT " & CANT_POR_PAGINA
-    
+Public Sub get96mas(fromCodigoODT, search)    
     sql = ""
     sql = sql & "SELECT o.* "
     sql = sql & "FROM odts o "
     sql = sql & "WHERE activo "
+    if fromCodigoODT > 0 then 
+		sql = sql & " AND codigoODT > " & fromCodigoODT & " "
+	end if
     sql = sql & "AND definido "
     sql = sql & "AND iniciado "
     sql = sql & "AND completadaEmpresa "
+    sql = sql & "AND terminadaFisicamente = -1 " 
     sql = sql & "AND (Aprobado <> 1) "
     sql = sql & "AND NOT ISNULL(fechacompletada) "
-    sql = sql & "AND (time_to_sec(timediff(NOW(), fechacompletada )) / 3600) > 96"
-'[fechaCompletada]+4 AS Expr1 
-'FROM odts WHERE (((odts.fechaCompletada) Is Not Null) AND ((odts.Aprobado)<>1) AND (([fechaCompletada]+4)>=Date()+4))
-'ORDER BY odts.codigoODT DESC;
-	'log(sql)
-
+    sql = sql & "AND (time_to_sec(timediff(NOW(), fechacompletada )) / 3600) > 96"    
     SqlOdtToJSON sql
   End Sub
 
