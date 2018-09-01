@@ -4,21 +4,29 @@
 <script type="text/template" id="informes_template">
   <div class="iRow ">    
     <div style="width: 10%;" class="botonEditarInforme">{{numeroInforme}}</div>
-    <div style="width: 60%;" class="botonEditarInforme">{{nombreInforme}}</div>
+    <div style="width: 50%;" class="botonEditarInforme">{{nombreInforme}}</div>
     <div style="width: 10%;" class="botonEditarInforme">{{desdeInforme}}</div>
     <div style="width: 10%;" class="editarInforme"><a class="informeRowToEdit">editar</a></div>
+    <div style="width: 10%;" class="borrarInforme"><a class="informeRowToDelete">borrar</a></div>
     <div style="width: 10%;" class="editarInforme">
       <a target="_blank" href="/odtweb/include/informe.asp?codigoInforme={{ codigoInforme }}" class="informeRowToGenerate">generar</a>
     </div>
   </div>
 </script>
 
-
-
-
+<!--
+  Template: Informe borrar
+-->
+<script type="text/template" id="informesBorrarTemplate">
+  <div style="text-align: right;padding: 20px;">
+    <input type="button" id="deleteInforme" value="Borrar Informe" class="btn btn-danger" />
+    <span style="margin: 2px;">&oacute;</span>
+    <a style="cursor: pointer" onclick="$('#ventana-dialogo').hide()">Cerrar</a>
+  </div>
+</script>
 
 <!--
-  Template: Informe asignar
+  Template: Informe editar
 -->
 <script type="text/template" id="informesEdicionTemplate">
 

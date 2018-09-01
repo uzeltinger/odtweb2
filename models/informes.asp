@@ -36,10 +36,15 @@ Class Informe
   
   End Sub  
 
-  Public Sub update(jsonData)   
-  response.write( jsonData ) 
-    dim facData : Set facData = JSON.parse(jsonData)
-    localLogAdd(jsonData)
+  Public Sub delete(codigoInforme)
+    action = "deleted"    
+    sql = "DELETE  FROM odtinformes WHERE codigoInforme = " & codigoInforme
+    Set RS = DbQuery(sql)
+    response.write("{""action"":"""& action &""",""codigoInforme"":"""& codigoInforme &"""}")
+  End Sub
+
+  Public Sub update(jsonData)    
+    dim facData : Set facData = JSON.parse(jsonData)    
     codigoInforme = Clng(facData.codigoInforme)    
     action = "u"    
     response.Charset = "utf-8" 

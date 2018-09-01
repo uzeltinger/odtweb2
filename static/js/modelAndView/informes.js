@@ -108,8 +108,20 @@ InformeView = Backbone.View.extend({
   },
   events: {
     "click .informeRowToEdit"  : "cargarColumnasInforme",
+    "click .informeRowToDelete"  : "borrarInforme",
     "click .botonEditarInforme" : "editarInforme",
     "click .informeRowToGenerate" : "generarInforme"
+  },
+
+  borrarInforme: function (){
+    console.log('borrarInforme');    
+    var model = this.model;
+    var viewFull = new InformeBorrarView({model: model});
+    var view = viewFull.render().el;   
+    $(".modal_dialog_content #modal_dialog_title").html("<span style='font-weight:normal;'>Borrar </span><span>Informe</span>");
+    $(".modal_dialog_body").html(view);   
+    $(".modal_dialog_content").width("650px");    
+    $("#ventana-dialogo").show(); 
   },
   
   editarInforme: function() {  
@@ -230,7 +242,34 @@ InformeView = Backbone.View.extend({
 
 
 
-
+InformeBorrarView = Backbone.View.extend({
+  initialize : function(){
+    //$("#editarInforme").show();    
+  },
+  render: function(){    
+    var variables = this.model.toJSON();
+    var template = _.template($('#informesBorrarTemplate').html());
+    $(this.el).html( template(variables) );
+    return this; 
+  },
+  events: {
+    'click #deleteInforme' : 'deleteInforme'
+  },  
+  deleteInforme: function(evento) {
+  this.model.destroy({
+    success: function(removed_inform, data) {
+      console.log('data',data);
+        //self.collection.remove(removed_person);
+    },
+    error: function(aborted_person, response) {
+        // Error handling as needed.
+      console.log('response',response);
+    }
+});
+    $("#ventana-dialogo").hide();
+    $("a#informes").click();
+  }
+});
 
 
 InformeEditarView = Backbone.View.extend({

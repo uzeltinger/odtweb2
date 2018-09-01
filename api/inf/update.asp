@@ -9,6 +9,10 @@
         i.update(Request("model"))
       end if  
   else    
-    i.getInforme(Request.QueryString("codigoInforme"))    
+    if request.QueryString("id") <> "" then
+        i.delete(request.QueryString("id"))
+      else
+        i.getInforme(Request.QueryString("codigoInforme"))  
+    end if    
   end if  
 %>
