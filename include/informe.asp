@@ -114,7 +114,9 @@ sql3 = "SELECT * FROM odtinformecolumna WHERE idInforme = """ + codigoInforme + 
                       		
             result3.MoveNext
             i = i + 1
-        Wend    
+        Wend            
+        tableHeader = tableHeader & "<td>Materiales</td>"  
+        tableHeader = tableHeader & "<td>Mano de Obra</td>"  
         tableHeader = tableHeader & "</tr>"        
        
         'response.write "campos a seleccionar de odts <br>" & odtsSelect
@@ -124,7 +126,7 @@ sql3 = "SELECT * FROM odtinformecolumna WHERE idInforme = """ + codigoInforme + 
 desdeInforme = FormatFechaSql(desdeInforme)
 hastaInforme = FormatFechaSql(hastaInforme)
 
-sql3 = "SELECT "&odtsSelect&" FROM odts WHERE fechaCreacion BETWEEN '"+desdeInforme+"' AND '"+hastaInforme+"' " & odtsFilter
+sql3 = "SELECT codigoODT as odtNumero,"&odtsSelect&" FROM odts WHERE fechaCreacion BETWEEN '"+desdeInforme+"' AND '"+hastaInforme+"' " & odtsFilter
 
 if mostrarConsultas Then
 response.write "<br>" 
@@ -138,10 +140,16 @@ Set result3 = DbQuery(sql3)
     i = 0
         tableBody = ""
         While Not result3.EOF
+            materialesValor = getMaterialesValor(result3("odtNumero"))
+            manodeobraValor = getManoDeObraValor(result3("odtNumero"))
             tableBody = tableBody & "<tr>"
             For Each col In result3.Fields
-            tableBody = tableBody & "<td>" & getColumnValue(col.Name,col.Value) & "</td>"             
+                if (col.Name <> "odtNumero") Then
+                    tableBody = tableBody & "<td>" & getColumnValue(col.Name,col.Value) & "</td>" 
+                End if            
             Next 
+            tableBody = tableBody & "<td>" & materialesValor & "</td>"     
+            tableBody = tableBody & "<td>" & manodeobraValor & "</td>"     
             tableBody = tableBody & "</tr>"   
             result3.MoveNext
             i = i + 1
@@ -182,4 +190,89 @@ Function getColumnValue(name,value)
     getColumnValue = value
 
 End Function
+
+'Listado de Mano de Obra     
+    Function getManoDeObraValor(codigoODT)
+    getManoDeObraValor = 1
+        Set rst = DbQuery("SELECT ODTitemsRealizados.Cant, ODTitemsRealizados.Observaciones, ODTItems.Descripcion, ODTItems.Precio FROM ODTitemsRealizados INNER JOIN ODTItems ON ODTitemsRealizados.codigoItem = ODTItems.codigoItem WHERE (((ODTitemsRealizados.CodigoODT)=" & codigoODT & "));")        
+        If recordCount(rst) > 0 Then                
+            i = 1            
+            While Not rst.EOF
+                Total = Total + rst("cant") * rst("Precio")                				
+                i = i + 1
+                rst.MoveNext
+            Wend
+            TotalMO = Total
+            TotalMO = FormatCurrency(TotalMO, 2)    
+        Else
+                TotalMO = ""
+        End If
+    getManoDeObraValor = TotalMO
+    End Function
+
+ ' Listado de Mat
+    Function getMaterialesValor(codigoODT)
+        Set rstMV = DbQuery("SELECT ODTItemsMateriales.NroOrden, ODTItemsMateriales.CodigoODT, ODTItemsMateriales.materialesTxt, ODTItemsMateriales.Cant, ODTItemsMateriales.Precio, ODTItemsMateriales.Observaciones , ODTItemsMateriales.NroFactura FROM ODTItemsMateriales WHERE ODTItemsMateriales.CodigoODT = " & codigoODT & " order by NroFactura ASC; ")
+        		
+        If recordCount(rstMV) > 0 Then
+        totalDeLaOrden = 0
+        totalDeLaFactura = 0
+        codigoFacturaAnterior = 0
+                            
+            TotalCGC = 0
+            Total = 0            
+            
+            i = 1
+            While Not rstMV.EOF
+                precioMateriales = (rstMV("cant") * rstMV("Precio"))
+                if codigoFacturaAnterior = rstMV("NroFactura") Then
+                    totalDeLaFactura = totalDeLaFactura + precioMateriales
+                    totalUltimaFactura = totalDeLaFactura
+                else
+                    'calcular % de agregado	0,22 0,17 5.000			
+                    if totalDeLaFactura >= CGCobtenerImporte(now) then
+                        totalDeLaFactura = totalDeLaFactura * (1 + CGCobtenerCGC2(now))
+                    else
+                        totalDeLaFactura = totalDeLaFactura * (1 + CGCobtenerCGC1(now))					
+                    end if
+                    totalDeLaOrden = totalDeLaOrden + totalDeLaFactura
+                    totalDeLaFactura = precioMateriales
+                    totalUltimaFactura = totalDeLaFactura
+                end if
+                codigoFacturaAnterior = rstMV("NroFactura")
+
+                Total = Total + (rstMV("cant") * rstMV("Precio"))                				
+                				
+				if not IsNull(rstMV("Observaciones")) then 
+					s = s & rstMV("Observaciones")
+				end if
+
+                i = i + 1
+                rstMV.MoveNext
+            Wend
+
+            'calcular % de agregado para la ultima factura que no entra en el ciclo'				
+            if totalUltimaFactura >= CGCobtenerImporte(now) then
+                totalUltimaFactura = totalUltimaFactura * (1 + CGCobtenerCGC2(now))	
+            else
+                totalUltimaFactura = totalUltimaFactura * (1 + CGCobtenerCGC1(now))
+            end if
+	        totalDeLaOrden = totalDeLaOrden + totalUltimaFactura
+            'response.write "totalDeLaOrden: " & totalDeLaOrden
+
+            if Total >= CGCobtenerImporte(fr) then
+                TotalCGC = Total * CGCobtenerCGC2(fr)
+            else
+                TotalCGC = Total * CGCobtenerCGC1(fr)
+            end if			
+            
+            TotalMat = totalDeLaOrden
+        TotalMat = FormatCurrency(TotalMat, 2)
+        Else
+            TotalMat = ""
+        End If
+	getMaterialesValor = TotalMat
+
+End Function
+
 %>
