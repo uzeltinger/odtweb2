@@ -109,7 +109,7 @@ InformeView = Backbone.View.extend({
   events: {
     "click .informeRowToEdit"  : "cargarColumnasInforme",
     "click .informeRowToDelete"  : "borrarInforme",
-    "click .botonEditarInforme" : "editarInforme",
+    //"click .botonEditarInforme" : "editarInforme",
     "click .informeRowToGenerate" : "generarInforme"
   },
 
@@ -145,6 +145,14 @@ InformeView = Backbone.View.extend({
     var model = this.model;
     var viewFull = new InformeEditarView({model: model, cargarColumnasAlInforme: true});
     var view = viewFull.render().el;
+    
+    $('#desdeInforme', view).datepicker({
+      dateFormat: 'dd-mm-yy'
+    });    
+    $('#hastaInforme', view).datepicker({
+      dateFormat: 'dd-mm-yy'
+    }); 
+
     var urlColumnasDelInforme = "api/odt/getColumnasDelInforme.asp?codigoInforme="+ model.get("codigoInforme");
     console.log('urlColumnasDelInforme',urlColumnasDelInforme);  
     $.get(urlColumnasDelInforme, function(estaLista, response){
