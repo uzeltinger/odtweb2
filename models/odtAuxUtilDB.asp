@@ -93,6 +93,24 @@ Sub listarCuentas(aprobador)
   
 end Sub
 
+Sub listarInformeCuentas(aprobador) 
+    where = ""
+    if aprobador <> "" then where = " AND sca.MNaprobador = '"& aprobador &"'"
+    'á
+    'sql = "SELECT CONCAT(sca.cuentaSAP, ' | ', sca.descripcion)  as id, sca.cuentaImputacion as text FROM sistemacuentasaprobadores sca WHERE sca.activo AND sca.sistema = 'ODT' " & where & " ORDER BY cuentaImputacion"
+
+    sql = "SELECT CONCAT(cuentaSAP, ' | ', IFNULL(descripcion,''))  as text, sistemacuentas.codigoCuenta as id "
+    sql = sql & "FROM sistemacuentasaprobadores sca "
+    sql = sql & "INNER JOIN sistemacuentas ON sca.codigoCuenta = sistemacuentas.codigoCuenta "
+    sql = sql & "WHERE sca.activo AND sistemacuentas.activo AND sca.sistema = 'ODT' " & where
+    sql = sql & " GROUP BY cuentaSAP "
+    sql = sql & "ORDER BY cuentaSAP"
+
+    
+  QueryToJSON(conexion, sql).Flush
+  
+end Sub
+
 Sub listarTareas()
     sql = "select codigoTipoTarea as id, Nombre as text from odttipotareas WHERE activo ORDER BY Nombre" 
   QueryToJSON(conexion, sql).Flush  

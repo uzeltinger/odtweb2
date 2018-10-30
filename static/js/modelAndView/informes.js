@@ -355,7 +355,7 @@ InformeEditarView = Backbone.View.extend({
       clearCombo('#cuentaCombo');
       let codigoCuentaSelected = $('#codigoCuentaSelected').val();  
       //let cuentas = 
-      loadComboData($('#cuentaCombo'),'api/getCuentas.asp', "", codigoCuentaSelected);
+      loadComboData($('#cuentaCombo'),'api/getInformeCuentas.asp', "", codigoCuentaSelected);
       $('#cuentaCombo').removeAttr('disabled');
       $('#cuentaCombo').css('opacity', 1);      
     },
